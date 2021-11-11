@@ -35,13 +35,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from typing import Callable, Optional, Any, Union, List
+
 from six.moves import zip
 import tensorflow as tf
 
 from tensorflow_graphics.util import export_api
+from tensorflow_graphics.util import type_alias
 
 
-def _values_and_jacobian(residuals, variables):
+def _values_and_jacobian(
+    residuals: Union[Callable[..., Any], List[Callable[..., Any]]],
+    variables: type_alias.TensorLike) -> type_alias.TensorLike:
   """Computes the residual values and the Jacobian matrix.
 
   Args:
@@ -79,12 +84,12 @@ def _values_and_jacobian(residuals, variables):
   return values, jacobian
 
 
-def minimize(residuals,
-             variables,
-             max_iterations,
-             regularizer=1e-20,
-             regularizer_multiplier=10.0,
-             callback=None,
+def minimize(residuals: Union[Callable[..., Any], List[Callable[..., Any]]],
+             variables: type_alias.TensorLike,
+             max_iterations: int,
+             regularizer: type_alias.Float = 1e-20,
+             regularizer_multiplier: type_alias.Float = 10.0,
+             callback: Optional[Callable[..., Any]] = None,
              name="levenberg_marquardt_minimize"):
   r"""Minimizes a set of residuals in the least-squares sense.
 
