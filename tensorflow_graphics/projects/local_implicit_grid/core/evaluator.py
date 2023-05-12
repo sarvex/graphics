@@ -42,14 +42,13 @@ def parse_param_file(param_file):
     l = l.rstrip('\n')
     splits = l.split(':')
     key = splits[0]
-    val_ = splits[1].strip()
-    if not val_:
-      val = ''
-    else:
+    if val_ := splits[1].strip():
       try:
         val = ast.literal_eval(val_)
       except (ValueError, SyntaxError):
         val = str(val_)
+    else:
+      val = ''
     d[key] = val
   return d
 
@@ -139,8 +138,7 @@ class RefinerEvaluator(object):
     """
     grid_points = self._get_grid_points(xmin=xmin, xmax=xmax, res=res)
     point_val = self.eval_points(lat, grid_points)
-    grid_val = point_val.reshape([res, res, res])
-    return grid_val
+    return point_val.reshape([res, res, res])
 
 
 class EncoderEvaluator(object):
@@ -245,10 +243,9 @@ class FullGridEncoderEvaluator(object):
     self.global_step_ = self.global_step.eval(session=self.sess)
     if overlap:
       ijk = np.arange(0, gres-int(in_grid_res/2), int(in_grid_res/2))
-      self.out_grid_res = ijk.shape[0]
     else:
       ijk = np.arange(0, gres, in_grid_res)
-      self.out_grid_res = ijk.shape[0]
+    self.out_grid_res = ijk.shape[0]
     self.ijk = np.meshgrid(ijk, ijk, ijk, indexing='ij')
     self.ijk = np.stack(self.ijk, axis=-1).reshape([-1, 3])
 
@@ -295,10 +292,7 @@ class FullGridEncoderEvaluator(object):
         start_ijk[:, tf.newaxis, tf.newaxis, tf.newaxis, :],
         [batch_size, w, w, w, 3])
     slice_idx += offset
-    # [batch_size, in_grid_res, in_grid_res, in_grid_res, 3]
-    batched_slices = tf.gather_nd(ary, slice_idx)
-    # [batch_size, in_grid_res, in_grid_res, in_grid_res]
-    return batched_slices
+    return tf.gather_nd(ary, slice_idx)
 
   def eval_grid(self, grid):
     """Strided evaluation of full grid into feature grid.
@@ -436,7 +430,7 @@ class LIGEvaluator(object):
       pts = points[sid:eid]
       pad_w = self.point_batch - (eid - sid)
       if pts.shape[0] < self.point_batch:
-        pts_pad = np.tile(pts[0:1], (pad_w, 1))
+        pts_pad = np.tile(pts[:1], (pad_w, 1))
         # repeat the first point in the batch
         pts = np.concatenate([pts, pts_pad], axis=0)
       with self.graph.as_default():
@@ -458,15 +452,13 @@ class LIGEvaluator(object):
     """
     grid_points = self._get_grid_points(xmin=xmin, xmax=xmax, res=res)
     point_val = self.eval_points(latgrid, grid_points)
-    grid_val = point_val.reshape([res, res, res])
-    return grid_val
+    return point_val.reshape([res, res, res])
 
   def _get_var_mapping(self, model):
     vars_ = model.trainable_variables
     varnames = [v.name for v in vars_]  # .split(':')[0]
     varnames = [self.scope+v.replace('lig/', '').strip(':0') for v in varnames]
-    map_dict = dict(zip(varnames, vars_))
-    return map_dict
+    return dict(zip(varnames, vars_))
 
 
 class UNetEvaluator(object):
@@ -591,11 +583,7 @@ class SparseLIGEvaluator(object):
                        mask[1:, :-1, 1:],
                        mask[1:, 1:, :-1],
                        mask[1:, 1:, 1:]], axis=-1)
-      if conservative:
-        mask = np.any(mask, axis=-1)
-      else:
-        mask = np.all(mask, axis=-1)
-
+      mask = np.any(mask, axis=-1) if conservative else np.all(mask, axis=-1)
     g = np.stack(np.meshgrid(np.arange(mask.shape[0]),
                              np.arange(mask.shape[1]),
                              np.arange(mask.shape[2]),

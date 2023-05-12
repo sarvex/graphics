@@ -159,7 +159,7 @@ def _tfrecords_to_dataset(tfrecords,
     A tf.data.TFRecordDataset
   """
 
-  total_tfrecords = sum([len(tf.io.gfile.glob(f)) for f in tfrecords])
+  total_tfrecords = sum(len(tf.io.gfile.glob(f)) for f in tfrecords)
   num_readers = min(total_tfrecords, max_readers)
   dataset = tf.data.Dataset.list_files(tfrecords, shuffle=shuffle)
   if repeat:

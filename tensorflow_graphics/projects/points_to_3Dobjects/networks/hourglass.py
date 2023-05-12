@@ -115,10 +115,10 @@ class EncoderDecoderBlock(tf.keras.layers.Layer):
   @staticmethod
   def make_decoder_hourglass_block(in_dim, out_dim, norm_type,
                                    kernel_regularizer, num_blocks):
-    hourglass_block = []
-    for _ in range(num_blocks - 1):
-      hourglass_block.append(
-          network_cb.ResidualBlock(in_dim, norm_type, kernel_regularizer))
+    hourglass_block = [
+        network_cb.ResidualBlock(in_dim, norm_type, kernel_regularizer)
+        for _ in range(num_blocks - 1)
+    ]
     skip = in_dim != out_dim
     hourglass_block.append(
         network_cb.ResidualBlock(
@@ -174,11 +174,12 @@ class Head(tf.keras.layers.Layer):
     x = self.conv(x)
     x_ = self.relu(x)
     x = self.out_conv(x_)
-    if self.return_features:
-      out_x = {self.name: x, f'{self.name}_features': x_}
-    else:
-      out_x = {self.name: x}
-    return out_x
+    return ({
+        self.name: x,
+        f'{self.name}_features': x_
+    } if self.return_features else {
+        self.name: x
+    })
 
 
 class ClassificationHead(tf.keras.layers.Layer):
@@ -193,14 +194,14 @@ class ClassificationHead(tf.keras.layers.Layer):
     super(ClassificationHead, self).__init__(name=name)
     self._encoder = []
     self._logits = []
-    for i in range(len(channels_per_block)):
-      self._encoder.append(
-          network_cb.ResidualBlock(
-              channels_per_block[i],
-              norm_type,
-              kernel_regularizer,
-              skip=True,
-              stride=2))
+    self._encoder.extend(
+        network_cb.ResidualBlock(
+            channels_per_block[i],
+            norm_type,
+            kernel_regularizer,
+            skip=True,
+            stride=2,
+        ) for i in range(len(channels_per_block)))
     self._logits = tf.keras.layers.Dense(
         num_classes,
         kernel_initializer='zeros',

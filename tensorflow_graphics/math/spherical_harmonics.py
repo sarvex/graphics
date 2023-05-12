@@ -147,11 +147,11 @@ def _evaluate_legendre_polynomial_loop(x, m, l, pmm, pmm1):
 
 def _evaluate_legendre_polynomial_branch(l, m, x, pmm):
   pmm1 = x * (2.0 * tf.cast(m, dtype=x.dtype) + 1.0) * pmm
-  # if, l == m + 1 return pmm1, otherwise lift to the next band.
-  res = tf.where(
-      tf.equal(l, m + 1), pmm1,
-      _evaluate_legendre_polynomial_loop(x, m, l, pmm, pmm1))
-  return res
+  return tf.where(
+      tf.equal(l, m + 1),
+      pmm1,
+      _evaluate_legendre_polynomial_loop(x, m, l, pmm, pmm1),
+  )
 
 
 def evaluate_legendre_polynomial(degree_l, order_m, x):

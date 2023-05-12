@@ -79,7 +79,7 @@ def rasterize(
     backend_module = importlib.import_module(
         "tensorflow_graphics.rendering.opengl.rasterization_backend")
   else:
-    raise KeyError("Backend is not supported: %s." % backend)
+    raise KeyError(f"Backend is not supported: {backend}.")
 
   return backend_module.rasterize(vertices, triangles, view_projection_matrices,
                                   image_size, enable_cull_face, num_layers)

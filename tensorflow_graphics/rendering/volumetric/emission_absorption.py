@@ -75,8 +75,7 @@ def render(voxels: type_alias.TensorLike,
 
     rendering = rendering * alpha
 
-    image = tf.concat([rendering, alpha], axis=-1)
-    return image
+    return tf.concat([rendering, alpha], axis=-1)
 
 
 # API contains all public functions and classes.

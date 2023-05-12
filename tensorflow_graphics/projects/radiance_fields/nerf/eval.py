@@ -77,10 +77,11 @@ def main(_):
       near=FLAGS.near,
       far=FLAGS.far,
       n_freq_posenc_xyz=FLAGS.n_freq_posenc_xyz,
-      scene_bbox=tuple([float(x) for x in FLAGS.scene_bbox.split(',')]),
+      scene_bbox=tuple(float(x) for x in FLAGS.scene_bbox.split(',')),
       n_freq_posenc_dir=FLAGS.n_freq_posenc_dir,
       n_filters=FLAGS.n_filters,
-      white_background=True)
+      white_background=True,
+  )
   model.init_coarse_and_fine_models()
   model.init_optimizer(learning_rate=FLAGS.learning_rate)
   model.init_checkpoint(checkpoint_dir=FLAGS.checkpoint_dir)

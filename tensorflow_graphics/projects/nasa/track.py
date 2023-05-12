@@ -132,10 +132,7 @@ def main(unused_argv):
 
   # Parse content of the interface
   latent_holder, latent, occ, rec_loss = interface
-  if FLAGS.glue_w > 0:
-    loss = rec_loss + glue_loss * FLAGS.glue_w
-  else:
-    loss = rec_loss
+  loss = rec_loss + glue_loss * FLAGS.glue_w if FLAGS.glue_w > 0 else rec_loss
   global_step = tf.train.get_or_create_global_step()
   optimizer = tf.train.AdamOptimizer(FLAGS.theta_lr)
   update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
@@ -192,11 +189,11 @@ def main(unused_argv):
             occ,
             data_example,
             FLAGS,
-            pth="tracked_{}".format(FLAGS.gradient_type))
-        utils.save_pointcloud(
-            data_example,
-            FLAGS,
-            pth="pointcloud_{}".format(FLAGS.gradient_type))
+            pth=f"tracked_{FLAGS.gradient_type}",
+        )
+        utils.save_pointcloud(data_example,
+                              FLAGS,
+                              pth=f"pointcloud_{FLAGS.gradient_type}")
 
         summary = sess.run(summary_op, {
             loss_holder: loss_val,
@@ -216,10 +213,8 @@ def main(unused_argv):
               temp_mat_val.reshape([FLAGS.n_parts, n_dims + 1, n_dims + 1]),
               accum_mat)
 
-      with tf.io.gfile.GFile(
-          path.join(FLAGS.train_dir, "tracked_{}".format(FLAGS.gradient_type),
-                    "iou.txt"), "w") as iout:
-        iout.write("{}\n".format(accum_iou / example_cnt))
+      with tf.io.gfile.GFile(path.join(FLAGS.train_dir, f"tracked_{FLAGS.gradient_type}", "iou.txt"), "w") as iout:
+        iout.write(f"{accum_iou / example_cnt}\n")
 
 
 if __name__ == "__main__":

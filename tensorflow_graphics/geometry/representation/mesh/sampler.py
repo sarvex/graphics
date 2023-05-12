@@ -83,8 +83,7 @@ def triangle_area(vertex0: type_alias.TensorLike,
 
     triangle_normals = triangle.normal(
         vertex0, vertex1, vertex2, normalize=False)
-    areas = 0.5 * tf.linalg.norm(tensor=triangle_normals, axis=-1)
-    return areas
+    return 0.5 * tf.linalg.norm(tensor=triangle_normals, axis=-1)
 
 
 def _random_categorical_sample(
@@ -135,10 +134,8 @@ def _random_categorical_sample(
         num_samples=num_samples,
         dtype=sample_dtype,
         seed=seed)
-    samples = tf.reshape(
-        draws,
-        shape=tf.concat((batch_shape, (num_samples,)), axis=0))
-    return samples
+    return tf.reshape(draws,
+                      shape=tf.concat((batch_shape, (num_samples, )), axis=0))
 
 
 def generate_random_face_indices(
@@ -182,12 +179,12 @@ def generate_random_face_indices(
     face_weights = asserts.assert_all_above(face_weights, minval=0.0)
     eps = asserts.select_eps_for_division(face_weights.dtype)
     face_weights = face_weights + eps
-    sampled_face_indices = _random_categorical_sample(
+    return _random_categorical_sample(
         num_samples=num_samples,
         weights=face_weights,
         seed=seed,
-        stateless=stateless)
-    return sampled_face_indices
+        stateless=stateless,
+    )
 
 
 def generate_random_barycentric_coordinates(
@@ -240,9 +237,8 @@ def generate_random_barycentric_coordinates(
         shape=sample_shape, minval=0.0, maxval=1.0, dtype=dtype, seed=seed)
     random1 = tf.sqrt(random_uniform[..., 0])
     random2 = random_uniform[..., 1]
-    barycentric = tf.stack(
-        (1 - random1, random1 * (1 - random2), random1 * random2), axis=-1)
-    return barycentric
+    return tf.stack((1 - random1, random1 * (1 - random2), random1 * random2),
+                    axis=-1)
 
 
 def weighted_random_sample_triangle_mesh(

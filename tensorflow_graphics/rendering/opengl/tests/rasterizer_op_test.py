@@ -215,10 +215,7 @@ class RasterizerOPTest(test_case.TestCase):
     height = 1
     width = 1
     empty_shader_code = "#version 450\n void main() { }\n"
-    if tf.executing_eagerly():
-      error = error_eager
-    else:
-      error = error_graph_mode
+    error = error_eager if tf.executing_eagerly() else error_graph_mode
     with self.assertRaisesRegexp(error, error_msg):
       self.evaluate(
           rasterization_backend.render_ops.rasterize(

@@ -40,7 +40,7 @@ def main(unused_argv):
   input_fn = datasets.get_dataset("train", FLAGS)
 
   # Select model.
-  logging.info("=> Creating {} model".format(FLAGS.model))
+  logging.info(f"=> Creating {FLAGS.model} model")
   model_fn = models.get_model(FLAGS)
 
   # Set up training.

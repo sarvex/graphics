@@ -173,8 +173,8 @@ class GraphConvolutionTestFeatureSteeredConvolutionTests(test_case.TestCase):
           var_c=c,
           var_w=w,
           var_b=b)
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {str(e)}")
 
   def test_feature_steered_convolution_exception_raised_shapes(self):
     """Check that invalid input shapes trigger the right exceptions."""
@@ -560,7 +560,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=sizes,
           edge_function=self._zeros,
           reduction="weighted",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
   @parameterized.parameters(
       (np.float32, np.float32, np.int32),
@@ -584,9 +585,10 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=sizes,
           edge_function=self._zeros,
           reduction="weighted",
-          edge_function_kwargs=dict())
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+          edge_function_kwargs={},
+      )
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {str(e)}")
 
   def test_edge_convolution_template_exception_raised_shapes(self):
     """Check that invalid input shapes trigger the right exceptions."""
@@ -599,7 +601,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=self._zeros,
           reduction="weighted",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
     with self.assertRaisesRegexp(ValueError, "must have a rank greater than 1"):
       data = np.ones(shape=(5), dtype=np.float32)
@@ -610,7 +613,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=self._zeros,
           reduction="weighted",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
     with self.assertRaisesRegexp(ValueError, "must have a rank of 1"):
       data, neighbors = _dummy_data(1, 5, 2)
@@ -620,7 +624,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=((1, 1), (1, 1)),
           edge_function=self._zeros,
           reduction="weighted",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
   @parameterized.parameters("", "invalid")
   def test_edge_convolution_template_exception_raised_reduction(
@@ -634,7 +639,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=self._zeros,
           reduction=reduction,
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
   @parameterized.parameters(
       (1, 1, 1, 1, "weighted"),
@@ -700,7 +706,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
         sizes=None,
         edge_function=self._edge_curvature_2d,
         reduction="weighted",
-        edge_function_kwargs=dict())
+        edge_function_kwargs={},
+    )
 
     self.assertEqual(data_curvature.shape, (2 * num_vertices + 1, 1))
 
@@ -743,7 +750,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=sizes,
           edge_function=self._pass_through,
           reduction=reduction,
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
     self.assert_jacobian_is_correct_fn(edge_convolution_template, [data_init])
 
@@ -761,7 +769,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=lambda x, y: x + y,
           reduction="max",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
       self.assertAllEqual(max_sum, true)
 
@@ -774,7 +783,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=lambda x, y: x + y,
           reduction="max",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
       self.assertAllEqual(max_sum_scaled, true)
 
@@ -797,7 +807,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=self._pass_through,
           reduction=reduction,
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
     self.assert_jacobian_is_correct_fn(edge_convolution_template, [data_init])
 
@@ -822,7 +833,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=self._pass_through,
           reduction="weighted",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
 
       self.assertAllEqual(data, data_smoothed)
 
@@ -836,7 +848,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
           sizes=None,
           edge_function=self._pass_through,
           reduction="weighted",
-          edge_function_kwargs=dict())
+          edge_function_kwargs={},
+      )
       # The smoothed points should have the same direction as the originals.
       data_smoothed_normalized = tf.nn.l2_normalize(data_smoothed, axis=-1)
 
@@ -867,7 +880,8 @@ class EdgeConvolutionTemplateTests(test_case.TestCase):
         sizes=None,
         edge_function=self._edge_curvature_2d,
         reduction="weighted",
-        edge_function_kwargs=dict())
+        edge_function_kwargs={},
+    )
 
     # The curvature at each point on a circle of radius 1 should be 1.
     self.assertAllClose(data_curvature, np.ones(shape=(num_vertices, 1)))

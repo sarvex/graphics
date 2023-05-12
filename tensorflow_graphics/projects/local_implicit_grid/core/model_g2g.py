@@ -314,5 +314,4 @@ class ModelG2G(tf.keras.Model):
       vals: `[batch, num_points, 3]` tensor, predicted values at query points.
     """
     self.outgrid = self.unet(voxgrid, training=training)
-    val = self.lig(self.outgrid, pts, training=training)
-    return val
+    return self.lig(self.outgrid, pts, training=training)

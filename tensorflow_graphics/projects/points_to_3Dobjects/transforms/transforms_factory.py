@@ -127,9 +127,8 @@ class TransformsFactory:
     else:
       raise ValueError(f'Transform not available {name}')
 
-    transform_fn = functools.partial(
+    return functools.partial(
         preprocessor.preprocess,
         preprocess_options=preprocess_options,
-        func_arg_map=func_arg_map)
-
-    return transform_fn
+        func_arg_map=func_arg_map,
+    )

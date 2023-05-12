@@ -75,11 +75,7 @@ class GraphPoolingTestPoolTests(test_case.TestCase):
     """Tests the correct exceptions are raised for invalid shapes."""
     data = np.ones(data_shape, dtype=np.float32)
     pool_map = _dense_to_sparse(np.ones(pool_map_shape, dtype=np.float32))
-    if sizes_shape is not None:
-      sizes = np.ones(sizes_shape, dtype=np.int32)
-    else:
-      sizes = None
-
+    sizes = None if sizes_shape is None else np.ones(sizes_shape, dtype=np.int32)
     with self.assertRaisesRegexp(ValueError, err_msg):
       gp.pool(data, pool_map, sizes)
 
@@ -216,11 +212,7 @@ class GraphPoolingTestUnpoolTests(test_case.TestCase):
     """Tests the correct exceptions are raised for invalid shapes."""
     data = np.ones(data_shape, dtype=np.float32)
     pool_map = _dense_to_sparse(np.ones(pool_map_shape, dtype=np.float32))
-    if sizes_shape is not None:
-      sizes = np.ones(sizes_shape, dtype=np.int32)
-    else:
-      sizes = None
-
+    sizes = None if sizes_shape is None else np.ones(sizes_shape, dtype=np.int32)
     with self.assertRaisesRegexp(ValueError, err_msg):
       gp.unpool(data, pool_map, sizes)
 
@@ -327,11 +319,7 @@ class GraphPoolingUpsampleTransposeConvolutionTests(test_case.TestCase):
     """Tests the correct exceptions are raised for invalid shapes."""
     data = np.ones(data_shape, dtype=np.float32)
     pool_map = _dense_to_sparse(np.ones(pool_map_shape, dtype=np.float32))
-    if sizes_shape is not None:
-      sizes = np.ones(sizes_shape, dtype=np.int32)
-    else:
-      sizes = None
-
+    sizes = None if sizes_shape is None else np.ones(sizes_shape, dtype=np.int32)
     with self.assertRaisesRegexp(ValueError, err_msg):
       gp.upsample_transposed_convolution(
           data, pool_map, sizes, kernel_size=1, transposed_convolution_op=None)

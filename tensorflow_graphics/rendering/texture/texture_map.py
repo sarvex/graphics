@@ -100,8 +100,8 @@ def map_texture(uv_map: tfg_type.TensorLike,
     texture_num_channels = texture_image_shape[-1]
 
     query_points = tf.reshape(uv_map, [1, -1, 2])
+    query_points_u = query_points[..., 0] * texture_width
     if tiling:
-      query_points_u = query_points[..., 0] * texture_width
       query_points_v = query_points[..., 1] * texture_height
       query_points_u = tf.math.floormod(query_points_u, texture_width)
       query_points_v = tf.math.floormod(query_points_v, texture_height)
@@ -122,7 +122,6 @@ def map_texture(uv_map: tfg_type.TensorLike,
       query_points_u = query_points_u + 1
       query_points_v = query_points_v + 1
     else:
-      query_points_u = query_points[..., 0] * texture_width
       query_points_v = (1 - query_points[..., 1]) * texture_height
 
     query_points = tf.stack((query_points_u, query_points_v), axis=-1)

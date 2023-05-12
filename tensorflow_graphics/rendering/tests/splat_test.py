@@ -117,7 +117,7 @@ class SplatTest(test_case.TestCase):
 
     for i in range(3):
       baseline_image = rasterization_test_utils.load_baseline_image(
-          'Two_Triangles_Splat_Layer_{}.png'.format(i))
+          f'Two_Triangles_Splat_Layer_{i}.png')
       image = normalized_layers[:, i, ...]
       image = tf.image.resize(
           image, (512, 512), method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)

@@ -88,7 +88,7 @@ class Camera(features.FeaturesDict):
   def encode_example(self, example_dict):
     """Convert the given parameters into a dict convertible to tf example."""
     REQUIRED_KEYS = ['pose', 'f', 'optical_center']  # pylint: disable=invalid-name
-    if not all(key in example_dict for key in REQUIRED_KEYS):
+    if any(key not in example_dict for key in REQUIRED_KEYS):
       raise ValueError(f'Missing keys in provided dictionary! '
                        f'Expected {REQUIRED_KEYS}, '
                        f'but {example_dict.keys()} were given.')
@@ -118,16 +118,13 @@ class Camera(features.FeaturesDict):
       raise ValueError('Wrong keys for pose feature provided!')
 
     aspect_ratio = 1
-    skew = 0
     if 'aspect_ratio' in example_dict.keys():
       if not isinstance(example_dict['f'], float):
         raise ValueError('If aspect ratio is provided, '
                          'f needs to be a single float.')
       aspect_ratio = example_dict['aspect_ratio']
 
-    if 'skew' in example_dict.keys():
-      skew = example_dict['skew']
-
+    skew = example_dict['skew'] if 'skew' in example_dict.keys() else 0
     features_dict['intrinsics'] = self._create_calibration_matrix(
         example_dict['f'],
         example_dict['optical_center'],
@@ -155,9 +152,7 @@ class Camera(features.FeaturesDict):
     side_vec = np.cross(dir_vec, up)
     side_vec /= np.linalg.norm(side_vec)
     up_vec = np.cross(side_vec, dir_vec)
-    matrix = np.array([side_vec, up_vec, -dir_vec])
-
-    return matrix
+    return np.array([side_vec, up_vec, -dir_vec])
 
   def _create_calibration_matrix(self, f, optical_center, aspect_ratio=1,
                                  skew=0):

@@ -37,7 +37,7 @@ def _sampling_points_from_grid(grid_size, dtype=tf.float64):
 
 
 def _transpose_last_two_dims(sampling_points):
-  axes = [i for i in range(len(sampling_points.shape))]
+  axes = list(range(len(sampling_points.shape)))
   axes[-1], axes[-2] = axes[-2], axes[-1]
   sampling_points = tf.transpose(a=sampling_points, perm=axes)
   return sampling_points

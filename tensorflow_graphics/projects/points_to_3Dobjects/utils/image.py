@@ -37,12 +37,8 @@ def get_affine_transform(center, scale, rot, output_size, inverse=False):
   src[2:, :] = get_3rd_point(src[0, :], src[1, :])
   dst[2:, :] = get_3rd_point(dst[0, :], dst[1, :])
 
-  if inverse:
-    transform = cv2.getAffineTransform(np.float32(dst), np.float32(src))
-  else:
-    transform = cv2.getAffineTransform(np.float32(src), np.float32(dst))
-
-  return transform
+  return (cv2.getAffineTransform(np.float32(dst), np.float32(src)) if inverse
+          else cv2.getAffineTransform(np.float32(src), np.float32(dst)))
 
 
 def get_3rd_point(point_1, point_2):
@@ -65,8 +61,7 @@ def transform_points(points, center, scale, output_size, inverse=False):
       center, scale, 0, output_size, inverse=inverse)
 
   new_points = np.concatenate([points, np.ones([points.shape[0], 1])], axis=1)
-  points_transformed = np.dot(transform, new_points.T).T
-  return points_transformed
+  return np.dot(transform, new_points.T).T
 
 
 def transform_predictions(points, center, scale, output_size):

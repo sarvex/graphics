@@ -62,7 +62,8 @@ class RotationMatrix2dTest(test_case.TestCase):
 
     self.assertAllEqual(
         rotation_matrix_2d.is_valid(matrix),
-        np.ones(euler_angles.shape[0:-1] + (1,), dtype=bool))
+        np.ones(euler_angles.shape[:-1] + (1, ), dtype=bool),
+    )
 
   @parameterized.parameters(
       ((td.ANGLE_0,), (td.MAT_2D_ID,)),

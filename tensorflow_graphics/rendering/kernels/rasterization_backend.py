@@ -112,7 +112,7 @@ def rasterize(
         last_axes=(-3, -3),
         broadcast_compatible=True)
 
-    if not num_layers > 0:
+    if num_layers <= 0:
       raise ValueError("num_layers must be > 0.")
 
     vertices = utils.transform_homogeneous(view_projection_matrices, vertices)

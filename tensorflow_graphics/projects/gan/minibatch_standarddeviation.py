@@ -67,8 +67,7 @@ class MiniBatchStandardDeviationBase(tf.keras.layers.Layer):
     mean = tf.reduce_mean(inputs, axis=batch_axis, keepdims=True)
     mean_sq_diff = tf.reduce_mean(
         tf.square(inputs - mean), axis=batch_axis, keepdims=True)
-    mean_stddev = tf.reduce_mean(tf.sqrt(mean_sq_diff), keepdims=True)
-    return mean_stddev
+    return tf.reduce_mean(tf.sqrt(mean_sq_diff), keepdims=True)
 
   def call(self, inputs):
 
@@ -147,33 +146,29 @@ class SyncMiniBatchStandardDeviation(MiniBatchStandardDeviationBase):
       # on 32-bit floats before converting the mean and variance back to fp16
       inputs_32 = tf.cast(inputs,
                           tf.float32) if inputs.dtype == tf.float16 else inputs
-      replica_ctx = tf.distribute.get_replica_context()
-      if replica_ctx:
-        local_sum = tf.reduce_sum(inputs_32, axis=batch_axis, keepdims=True)
-        local_squared_sum = tf.reduce_sum(
-            tf.square(inputs_32), axis=batch_axis, keepdims=True)
-        batch_size = tf.cast(tf.shape(inputs_32)[batch_axis], tf.float32)
-        # TODO(b/163099951): batch the all-reduces once we sort out the ordering
-        # issue for NCCL. We don't have a mechanism to launch NCCL in the same
-        # order in each replica nowadays, so we limit NCCL to batch all-reduces.
-        y_sum = replica_ctx.all_reduce(tf.distribute.ReduceOp.SUM, local_sum)
-        y_squared_sum = replica_ctx.all_reduce(tf.distribute.ReduceOp.SUM,
-                                               local_squared_sum)
-        global_batch_size = replica_ctx.all_reduce(tf.distribute.ReduceOp.SUM,
-                                                   batch_size)
-
-        mean = y_sum / global_batch_size
-        y_squared_mean = y_squared_sum / global_batch_size
-        # var = E(x^2) - E(x)^2
-        variance = y_squared_mean - tf.square(mean)
-        stddev = tf.sqrt(variance)
-        mean_stddev = tf.reduce_mean(stddev, keepdims=True)
-
-      else:
-        mean_stddev = super()._calculate_mean_feature_standard_deviation(
+      if not (replica_ctx := tf.distribute.get_replica_context()):
+        return super()._calculate_mean_feature_standard_deviation(
             inputs, batch_axis)
 
-      return mean_stddev
+      local_sum = tf.reduce_sum(inputs_32, axis=batch_axis, keepdims=True)
+      local_squared_sum = tf.reduce_sum(
+          tf.square(inputs_32), axis=batch_axis, keepdims=True)
+      batch_size = tf.cast(tf.shape(inputs_32)[batch_axis], tf.float32)
+      # TODO(b/163099951): batch the all-reduces once we sort out the ordering
+      # issue for NCCL. We don't have a mechanism to launch NCCL in the same
+      # order in each replica nowadays, so we limit NCCL to batch all-reduces.
+      y_sum = replica_ctx.all_reduce(tf.distribute.ReduceOp.SUM, local_sum)
+      y_squared_sum = replica_ctx.all_reduce(tf.distribute.ReduceOp.SUM,
+                                             local_squared_sum)
+      global_batch_size = replica_ctx.all_reduce(tf.distribute.ReduceOp.SUM,
+                                                 batch_size)
+
+      mean = y_sum / global_batch_size
+      y_squared_mean = y_squared_sum / global_batch_size
+      # var = E(x^2) - E(x)^2
+      variance = y_squared_mean - tf.square(mean)
+      stddev = tf.sqrt(variance)
+      return tf.reduce_mean(stddev, keepdims=True)
 
 
 class MiniBatchStandardDeviation(MiniBatchStandardDeviationBase):

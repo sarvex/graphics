@@ -39,14 +39,14 @@ def main(argv):
   for i in range(3):
     fake_points = np.random.randn(8, 2048, 3).astype(np.float32)
     fake_label = np.random.uniform(low=0, high=40, size=(8, 1)).astype(np.uint8)
-    path = os.path.join(FLAGS.fakes_path, "ply_data_train{}.h5".format(i))
+    path = os.path.join(FLAGS.fakes_path, f"ply_data_train{i}.h5")
     with h5py.File(path, "w") as h5f:
       h5f.create_dataset("data", data=fake_points)
       h5f.create_dataset("label", data=fake_label)
   for i in range(2):
     fake_points = np.random.randn(8, 2048, 3).astype(np.float32)
     fake_label = np.random.uniform(low=0, high=40, size=(8, 1)).astype(np.uint8)
-    path = os.path.join(FLAGS.fakes_path, "ply_data_test{}.h5".format(i))
+    path = os.path.join(FLAGS.fakes_path, f"ply_data_test{i}.h5")
     with h5py.File(path, "w") as h5f:
       h5f.create_dataset("data", data=fake_points)
       h5f.create_dataset("label", data=fake_label)

@@ -106,7 +106,8 @@ class RotationMatrix3dTest(test_case.TestCase):
 
     self.assertAllEqual(
         rotation_matrix_3d.is_valid(matrix_axis_angle),
-        np.ones(euler_angles.shape[0:-1] + (1,)))
+        np.ones(euler_angles.shape[:-1] + (1, )),
+    )
 
   def test_from_axis_angle_normalized_random(self):
     """Tests that axis-angles can be converted to rotation matrices."""
@@ -215,7 +216,8 @@ class RotationMatrix3dTest(test_case.TestCase):
 
     self.assertAllEqual(
         rotation_matrix_3d.is_valid(matrix),
-        np.ones(euler_angles.shape[0:-1] + (1,)))
+        np.ones(euler_angles.shape[:-1] + (1, )),
+    )
 
   def test_from_euler_normalized_random(self):
     """Tests that euler angles can be converted to rotation matrices."""
@@ -225,7 +227,8 @@ class RotationMatrix3dTest(test_case.TestCase):
 
     self.assertAllEqual(
         rotation_matrix_3d.is_valid(matrix),
-        np.ones(random_euler_angles.shape[0:-1] + (1,)))
+        np.ones(random_euler_angles.shape[:-1] + (1, )),
+    )
 
   @parameterized.parameters(
       ((td.AXIS_3D_0,), (td.MAT_3D_ID,)),
@@ -346,7 +349,8 @@ class RotationMatrix3dTest(test_case.TestCase):
 
     self.assertAllEqual(
         rotation_matrix_3d.is_valid(matrix_quat),
-        np.ones(euler_angles.shape[0:-1] + (1,)))
+        np.ones(euler_angles.shape[:-1] + (1, )),
+    )
 
   def test_from_quaternion_normalized_random(self):
     """Tests that random quaternions can be converted to rotation matrices."""

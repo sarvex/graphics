@@ -32,7 +32,7 @@ def main(_):
 
   fig = plt.figure()
   ax3 = fig.add_subplot(111, projection="3d")
-  ax3.set_title("Example with label {}".format(label))
+  ax3.set_title(f"Example with label {label}")
   scatter3 = lambda p, c="r", *args: ax3.scatter(p[:, 0], p[:, 1], p[:, 2], c)
   scatter3(points)
 

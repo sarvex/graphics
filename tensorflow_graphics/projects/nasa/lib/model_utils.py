@@ -151,7 +151,6 @@ def nasa_indicator(points,
     point_indicators: tf.Tensor, [batch, n_points, 1].
     point_perpart_indicators: tf.Tensor, [batch, n_parts, n_points, 1].
   """
-  n_dims = 3
   cerb_dims = int(np.ceil(1. * hparams.total_dim / hparams.n_parts))
   shared_decoder = hparams.shared_decoder
   n_parts = hparams.n_parts
@@ -165,6 +164,7 @@ def nasa_indicator(points,
     points = transform_points(points, transform)
   if noise is not None:
     points = tf.expand_dims(points, axis=3) + noise
+    n_dims = 3
     points = tf.reshape(points, [batch_size, n_parts, -1, n_dims])
   n_points = tf.shape(points)[2]
 
@@ -209,15 +209,10 @@ def nasa_mlp(points, hparams, dims=256, shared=False):
     x = points[:, idx]
     x = tf.reshape(x, [-1, n_point_dims])
     branch_id = 0 if shared else idx
-    with tf.variable_scope("branch_{}".format(branch_id), reuse=tf.AUTO_REUSE):
+    with tf.variable_scope(f"branch_{branch_id}", reuse=tf.AUTO_REUSE):
       for i, dim in enumerate(widths):
         residual = x
-        x = tf.layers.dense(
-            inputs=x,
-            units=dim,
-            activation=None,
-            name="fc_layer_{}".format(i),
-        )
+        x = tf.layers.dense(inputs=x, units=dim, activation=None, name=f"fc_layer_{i}")
         if i == 0:
           x = tf.nn.leaky_relu(x, alpha=0.1)
         elif i < n_widths - 1:

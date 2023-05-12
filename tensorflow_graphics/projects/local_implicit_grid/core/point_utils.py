@@ -68,14 +68,12 @@ def np_pad_points(points, ntarget):
     nextra = ntarget-points.shape[0]
     extra_idx = np.random.choice(rand_pool.shape[0], nextra, replace=False)
     extra_pts = rand_pool[extra_idx]
-    points_out = np.concatenate([points, extra_pts], axis=0)
+    return np.concatenate([points, extra_pts], axis=0)
   else:
     idx_choice = np.random.choice(points.shape[0],
                                   size=ntarget,
                                   replace=False)
-    points_out = points[idx_choice]
-
-  return points_out
+    return points[idx_choice]
 
 
 def np_gather_ijk_index(arr, index):
@@ -112,7 +110,7 @@ def np_shifted_crop(v, idx_grid, shift, crop_size, ntarget):
   point_idxs_sorted = point_idxs[sortarr]
   bins = np.searchsorted(revidx_sorted, np.arange(ncrops))
   bins = list(bins) + [v.shape[0]]
-  sid = bins[0:-1]
+  sid = bins[:-1]
   eid = bins[1:]
   # initialize outputs
   point_crops = np.zeros([ncrops, ntarget, nchannel])

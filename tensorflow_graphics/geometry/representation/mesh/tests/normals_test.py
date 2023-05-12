@@ -271,10 +271,9 @@ class MeshTest(test_case.TestCase):
 
     with self.subTest(name="polygon_faces"):
       num_vertices = np.random.randint(4, 8)
-      poly_vertices = []
       rad_step = np.pi * 2. / num_vertices
-      for i in range(num_vertices):
-        poly_vertices.append([np.cos(i * rad_step), np.sin(i * rad_step), 0])
+      poly_vertices = [[np.cos(i * rad_step),
+                        np.sin(i * rad_step), 0] for i in range(num_vertices)]
       vertex_init = np.array(poly_vertices, dtype=np.float32)
       vertex_init = vertex_init.reshape([1] * tensor_vertex_size + [-1, 3])
       vertex_init = vertex_init * vertex_scale

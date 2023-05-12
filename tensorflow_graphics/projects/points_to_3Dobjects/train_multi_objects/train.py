@@ -177,11 +177,10 @@ def get_soft_shape_labels(sdfs):
 def get_model(shape_centers, shape_sdfs, shape_pointclouds, dict_clusters):
   """Get model."""
   kernel_regularization = None
-  if FLAGS.kernel_regularization == 'l2' or FLAGS.kernel_regularization == 'l1':
+  if FLAGS.kernel_regularization in ['l2', 'l1']:
     kernel_regularization = FLAGS.kernel_regularization
 
-  head_losses = {}
-  head_losses['centers'] = {'loss': focal_loss.FocalLoss(), 'weight': 1.0}
+  head_losses = {'centers': {'loss': focal_loss.FocalLoss(), 'weight': 1.0}}
   if FLAGS.predict_2d_box:
     head_losses['offset'] = {'loss': regression_l1_loss.RegL1Loss(),
                              'weight': 1.0}
@@ -224,10 +223,7 @@ def get_model(shape_centers, shape_sdfs, shape_pointclouds, dict_clusters):
     head_losses['sdfs'] = {'loss': regression_huber_loss.HuberLoss(),
                            'weight': FLAGS.shape_sdf_sdf_weight}
 
-  num_shapes = 300
-  if 'scannet' in FLAGS.tfrecords_dir:
-    num_shapes = 50 * 8
-
+  num_shapes = 50 * 8 if 'scannet' in FLAGS.tfrecords_dir else 300
   model = centernet_vid.CenterNetVID(
       heads_losses=head_losses,
       heads={'centers': {'dim': FLAGS.num_classes},
@@ -339,7 +335,7 @@ def get_dataset(split, shape_soft_labels, shape_pointclouds=None):
 def get_learning_rate_fn():
   decay_steps = int(8e6)
   start_decay_step = int(30.0e6)
-  warmup_steps = int(150000)
+  warmup_steps = 150000
   if FLAGS.debug:
     decay_steps = 30000
     start_decay_step = 20000
@@ -376,11 +372,13 @@ def get_evaluator():
       # '3D_mAP_80': evaluator_util.BoxIoUMetric(t=0.80, threed=True),
       # '3D_mAP_90': evaluator_util.BoxIoUMetric(t=0.90, threed=True)
       }, split=FLAGS.split, shapenet_dir=FLAGS.shapenet_dir)
-  slave = (FLAGS.part_id > -1)
-  if slave:
-    iou_path = os.path.join(FLAGS.logdir,
-                            FLAGS.metrics_dir, 'iou',
-                            'iou_'+str(FLAGS.part_id).zfill(4)+'.pkl')
+  if slave := (FLAGS.part_id > -1):
+    iou_path = os.path.join(
+        FLAGS.logdir,
+        FLAGS.metrics_dir,
+        'iou',
+        f'iou_{str(FLAGS.part_id).zfill(4)}.pkl',
+    )
     if not tf.io.gfile.exists(os.path.dirname(iou_path)):
       tf.io.gfile.makedirs(os.path.dirname(iou_path))
 
@@ -388,7 +386,8 @@ def get_evaluator():
         FLAGS.logdir,
         FLAGS.metrics_dir,
         'collision',
-        'collision_'+str(FLAGS.part_id).zfill(4)+'.pkl')
+        f'collision_{str(FLAGS.part_id).zfill(4)}.pkl',
+    )
     if not tf.io.gfile.exists(os.path.dirname(collision_path)):
       tf.io.gfile.makedirs(os.path.dirname(collision_path))
 
@@ -718,17 +717,16 @@ def _val_epoch(
       _ = plt.figure(figsize=(5, 5))
       plt.clf()
       plt.imshow(image)
-      filepath_input = os.path.join(path_input, scene_name+'.png')
+      filepath_input = os.path.join(path_input, f'{scene_name}.png')
       with tf.io.gfile.GFile(filepath_input, 'wb') as f:
         plt.savefig(f)
 
       # Plot image 2D bounding boxes
       plot.plot_boxes_2d(image, sample, detections,
                          groundtruth=(not FLAGS.francis))
-      filepath_2d_min = \
-          os.path.join(path_2d_min, iou_min_str+'_'+scene_name+'.png')
-      filepath_2d_mean = \
-          os.path.join(path_2d_mean, iou_mean_str+'_'+scene_name+'.png')
+      filepath_2d_min = os.path.join(path_2d_min, f'{iou_min_str}_{scene_name}.png')
+      filepath_2d_mean = os.path.join(path_2d_mean,
+                                      f'{iou_mean_str}_{scene_name}.png')
       for path in [filepath_2d_min, filepath_2d_mean]:
         with tf.io.gfile.GFile(path, 'wb') as f:
           plt.savefig(f)
@@ -738,10 +736,9 @@ def _val_epoch(
                          sample,
                          detections,
                          groundtruth=(not FLAGS.francis))
-      filepath_3d_min = \
-          os.path.join(path_3d_min, iou_min_str+'_'+scene_name+'.png')
-      filepath_3d_mean = \
-          os.path.join(path_3d_mean, iou_mean_str+'_'+scene_name+'.png')
+      filepath_3d_min = os.path.join(path_3d_min, f'{iou_min_str}_{scene_name}.png')
+      filepath_3d_mean = os.path.join(path_3d_mean,
+                                      f'{iou_mean_str}_{scene_name}.png')
       for path in [filepath_3d_min, filepath_3d_mean]:
         with tf.io.gfile.GFile(path, 'wb') as f:
           plt.savefig(f)
@@ -749,16 +746,24 @@ def _val_epoch(
       if FLAGS.local_plot_3d:
         # Plot 3D visualizer
         path = os.path.join(
-            '..', os.path.join(*(logdir.split(os.path.sep)[6:])),
-            'qualitative', 'web_3d_min', iou_min_str+'_'+scene_name)
+            '..',
+            os.path.join(*(logdir.split(os.path.sep)[6:])),
+            'qualitative',
+            'web_3d_min',
+            f'{iou_min_str}_{scene_name}',
+        )
         plot.plot_detections_3d(detections,
                                 sample,
                                 path,
                                 model.dict_clusters,
                                 local=FLAGS.francis)
         path = os.path.join(
-            '..', os.path.join(*(logdir.split(os.path.sep)[6:])),
-            'qualitative', 'web_3d_mean', iou_mean_str+'_'+scene_name)
+            '..',
+            os.path.join(*(logdir.split(os.path.sep)[6:])),
+            'qualitative',
+            'web_3d_mean',
+            f'{iou_mean_str}_{scene_name}',
+        )
         plot.plot_detections_3d(detections,
                                 sample,
                                 path,

@@ -48,7 +48,7 @@ def main(unused_argv):
   batch = tf.data.make_one_shot_iterator(data).get_next()
 
   # Select model.
-  logging.info('=> Creating {} model'.format(FLAGS.model))
+  logging.info(f'=> Creating {FLAGS.model} model')
   model = models.get_model(FLAGS.model, FLAGS)
 
   # Set up the graph
@@ -72,14 +72,14 @@ def main(unused_argv):
   while True:
     shapenet_stats = utils.init_stats()
     with tf.train.MonitoredTrainingSession(
-        checkpoint_dir=FLAGS.train_dir,
-        hooks=[],
-        save_checkpoint_steps=None,
-        save_checkpoint_secs=None,
-        save_summaries_steps=None,
-        save_summaries_secs=None,
-        log_step_count_steps=None,
-        max_wait_secs=3600) as mon_sess:
+            checkpoint_dir=FLAGS.train_dir,
+            hooks=[],
+            save_checkpoint_steps=None,
+            save_checkpoint_secs=None,
+            save_summaries_steps=None,
+            save_summaries_secs=None,
+            log_step_count_steps=None,
+            max_wait_secs=3600) as mon_sess:
       step_val = mon_sess.run(global_step)
       if step_val <= last_step:
         continue
@@ -89,10 +89,7 @@ def main(unused_argv):
         batch_val, unused_var, test_iou_val = mon_sess.run(
             [batch, test_loss, test_iou])
         if FLAGS.extract_mesh or FLAGS.surface_metrics:
-          if FLAGS.image_input:
-            input_val = batch_val['image']
-          else:
-            input_val = batch_val['depth']
+          input_val = batch_val['image'] if FLAGS.image_input else batch_val['depth']
           mesh = utils.extract_mesh(
               input_val,
               params,

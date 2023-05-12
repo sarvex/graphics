@@ -64,14 +64,15 @@ def channels_to_ndarray(exr, channel_names):
     try:
       numpy_type = _exr_to_np[channel_type.v]
     except KeyError:
-      raise RuntimeError('Unknown EXR channel type: %s' % str(channel_type))
+      raise RuntimeError(f'Unknown EXR channel type: {str(channel_type)}')
     flat_buffer = np.frombuffer(exr.channel(channel), numpy_type)
     return np.reshape(flat_buffer, [height, width])
 
   channels = [read_channel(c) for c in channel_names]
-  if any([channels[0].dtype != c.dtype for c in channels[1:]]):
-    raise ValueError('Channels have mixed datatypes: %s' %
-                     ', '.join([str(c.dtype) for c in channels]))
+  if any(channels[0].dtype != c.dtype for c in channels[1:]):
+    raise ValueError(
+        f"Channels have mixed datatypes: {', '.join([str(c.dtype) for c in channels])}"
+    )
   # Stack the arrays so that the channels dimension is the last (fastest
   # changing) dimension.
   return np.stack(channels, axis=-1)
@@ -132,12 +133,11 @@ def write_exr(filename, values, channel_names):
   try:
     exr_channel_type = Imath.PixelType(_np_to_exr[values.dtype.type])
   except KeyError:
-    raise TypeError('Unsupported numpy type: %s' % str(values.dtype))
+    raise TypeError(f'Unsupported numpy type: {str(values.dtype)}')
   header['channels'] = {
       n: Imath.Channel(exr_channel_type) for n in channel_names
   }
   channel_data = [values[..., i] for i in range(values.shape[-1])]
   exr = OpenEXR.OutputFile(filename, header)
-  exr.writePixels(
-      dict((n, d.tobytes()) for n, d in zip(channel_names, channel_data)))
+  exr.writePixels({n: d.tobytes() for n, d in zip(channel_names, channel_data)})
   exr.close()

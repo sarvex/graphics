@@ -223,8 +223,7 @@ class PointNetVanillaClassifier(tf.keras.layers.Layer):
       Tensor with shape `[B,num_classes]`
     """
     features = self.encoder(points, training)  # (B,1024)
-    logits = self.classifier(features, training)  # (B,num_classes)
-    return logits
+    return self.classifier(features, training)
 
   @staticmethod
   def loss(labels, logits):

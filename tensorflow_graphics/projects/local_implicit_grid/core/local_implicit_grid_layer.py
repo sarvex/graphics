@@ -56,8 +56,8 @@ class LocalImplicitGrid(layers.Layer):
     """
     super(LocalImplicitGrid, self).__init__(name=name)
     # Print warning if x_location_max and method do not match
-    if not ((x_location_max == 1 and method == "linear") or
-            (x_location_max == 2 and method == "nn")):
+    if (x_location_max != 1 or method != "linear") and (x_location_max != 2
+                                                        or method != "nn"):
       raise ValueError("Bad combination of x_location_max and method.")
     self.cin = in_features
     self.cout = out_features
@@ -107,9 +107,7 @@ class LocalImplicitGrid(layers.Layer):
     pts = tf.ensure_shape(pts, (None, None, self.dim))
 
     lat, weights, xloc = self._interp(grid, pts)
-    outputs = self._eval_net(lat, weights, xloc, training=training)
-
-    return outputs
+    return self._eval_net(lat, weights, xloc, training=training)
 
   def _interp(self, grid, pts):
     """Interpolation function to get local latent code, weights & relative loc.

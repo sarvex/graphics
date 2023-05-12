@@ -69,10 +69,11 @@ def main(_):
       near=FLAGS.near,
       far=FLAGS.far,
       n_freq_posenc_xyz=FLAGS.n_freq_posenc_xyz,
-      scene_bbox=tuple([float(x) for x in FLAGS.scene_bbox.split(',')]),
+      scene_bbox=tuple(float(x) for x in FLAGS.scene_bbox.split(',')),
       n_freq_posenc_dir=FLAGS.n_freq_posenc_dir,
       n_filters=FLAGS.n_filters,
-      white_background=FLAGS.white_background)
+      white_background=FLAGS.white_background,
+  )
   model.init_coarse_and_fine_models()
   model.init_optimizer(learning_rate=FLAGS.learning_rate,
                        decay_steps=FLAGS.decay_steps)

@@ -253,8 +253,7 @@ def stratified_geomspace_1d(near: TensorLike,
     bin_above = bin_borders[..., 1:]
     target_shape = tf.concat([tf.shape(near), [num_samples]], axis=-1)
     random_point_in_bin = tf.random.uniform(target_shape)
-    z_values = bin_below + (bin_above - bin_below) * random_point_in_bin
-    return z_values
+    return bin_below + (bin_above - bin_below) * random_point_in_bin
 
 
 def _normalize_pdf(pdf: TensorLike, name="normalize_pdf") -> tf.Tensor:
@@ -348,8 +347,7 @@ def inverse_transform_sampling_1d(
     uniform_samples = tf.random.uniform(target_shape)
     bin_indices = tf.searchsorted(cdf, uniform_samples, side="right")
     bin_indices = tf.maximum(0, bin_indices - 1)
-    z_values = tf.gather(bins, bin_indices, axis=-1, batch_dims=batch_dims)
-    return z_values
+    return tf.gather(bins, bin_indices, axis=-1, batch_dims=batch_dims)
 
 
 def inverse_transform_stratified_1d(bin_start: TensorLike,

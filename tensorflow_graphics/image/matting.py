@@ -62,8 +62,7 @@ def _quadratic_form(matrix: type_alias.TensorLike,
     A tensor of shape `[A1, ..., An, 1]`.
   """
   vector_matrix = tf.matmul(vector, matrix)
-  vector_matrix_vector = tf.matmul(vector_matrix, vector, transpose_b=True)
-  return vector_matrix_vector
+  return tf.matmul(vector_matrix, vector, transpose_b=True)
 
 
 def _image_patches(image: type_alias.TensorLike, size: int) -> tf.Tensor:

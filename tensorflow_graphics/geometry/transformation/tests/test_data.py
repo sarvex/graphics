@@ -61,7 +61,7 @@ def _axis_angle_to_quaternion(axis, angle):
     The quaternion.
   """
   quat = np.zeros(4)
-  quat[0:3] = axis * np.sin(0.5 * angle)
+  quat[:3] = axis * np.sin(0.5 * angle)
   quat[3] = np.cos(0.5 * angle)
   return quat
 

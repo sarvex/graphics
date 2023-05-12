@@ -32,8 +32,7 @@ def softargmax(y, voxels, beta=50):
   softmax = tf.nn.softmax(beta * y)
   softmax = tf.reshape(softmax, [batch_size, num_objects, num_shapes, 1])
   voxels = tf.reshape(voxels, [1, num_shapes, -1])
-  result = tf.reduce_sum(voxels * softmax, axis=2)
-  return result
+  return tf.reduce_sum(voxels * softmax, axis=2)
 
 
 class SoftArgMax(tf.keras.layers.Layer):
@@ -72,11 +71,15 @@ def assemble_pose(rotations_3d, translations_3d, sizes_3d):
   sizes_3d = tf.linalg.diag(sizes_3d)
   rotations_3d = rotations_3d @ sizes_3d
   translations_3d = tf.reshape(translations_3d, [batch_size, -1, 3, 1])
-  poses = tf.concat([
-      tf.concat([rotations_3d, tf.zeros([batch_size, 3, 1, 3])], axis=-2),
-      tf.concat([translations_3d, tf.ones([batch_size, 3, 1, 1])], axis=-2)],
-                    axis=-1)
-  return poses
+  return tf.concat(
+      [
+          tf.concat(
+              [rotations_3d, tf.zeros([batch_size, 3, 1, 3])], axis=-2),
+          tf.concat([translations_3d,
+                     tf.ones([batch_size, 3, 1, 1])], axis=-2),
+      ],
+      axis=-1,
+  )
 
 
 def transform_pointcloud(pointclouds, sizes_3d, rotations_3d, translations_3d,

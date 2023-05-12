@@ -23,15 +23,15 @@ class ExportAPITest(test_case.TestCase):
     """Tests that get_functions_and_classes does not raise an exception."""
     try:
       export_api.get_functions_and_classes()
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {str(e)}")
 
   def test_get_modules(self):
     """Tests that get_modules does not raise an exception."""
     try:
       export_api.get_modules()
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {str(e)}")
 
 
 if __name__ == "__main__":

@@ -71,8 +71,8 @@ def _triangular_mesh_to_three_geometry(vertices, faces, vertex_colors=None):
 def build_context():
   """Builds a javascript context."""
   threejs_url = 'https://www.gstatic.com/external_hosted/threejs-r98/'
-  _publish.javascript(url=threejs_url + 'three.min.js')
-  _publish.javascript(url=threejs_url + 'examples/js/controls/OrbitControls.js')
+  _publish.javascript(url=f'{threejs_url}three.min.js')
+  _publish.javascript(url=f'{threejs_url}examples/js/controls/OrbitControls.js')
   return _js_builder.Js(mode=_js_builder.PERSISTENT)
 
 

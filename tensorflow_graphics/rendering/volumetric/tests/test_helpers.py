@@ -22,9 +22,8 @@ def generate_random_test_voxels_render():
   voxels_shape = np.random.randint(2, 8, size=(3)).tolist()
   signals_dimension = np.random.randint(2, 4)
 
-  random_voxels = np.random.uniform(size=[batch_shape] + voxels_shape +
-                                    [signals_dimension])
-  return random_voxels
+  return np.random.uniform(size=[batch_shape] + voxels_shape +
+                           [signals_dimension])
 
 
 def generate_preset_test_voxels_visual_hull_render():

@@ -122,10 +122,7 @@ def feature_steered_convolution(
 
     # Flatten the batch dimensions and remove any vertex padding.
     if data_ndims > 2:
-      if sizes is not None:
-        sizes_square = tf.stack((sizes, sizes), axis=-1)
-      else:
-        sizes_square = None
+      sizes_square = tf.stack((sizes, sizes), axis=-1) if sizes is not None else None
       x_flat, unflatten = utils.flatten_batch_to_2d(data, sizes)
       adjacency = utils.convert_to_block_diag_2d(neighbors, sizes_square)
     else:
@@ -250,10 +247,7 @@ def edge_convolution_template(
 
     # Flatten the batch dimensions and remove any vertex padding.
     if data_ndims > 2:
-      if sizes is not None:
-        sizes_square = tf.stack((sizes, sizes), axis=-1)
-      else:
-        sizes_square = None
+      sizes_square = tf.stack((sizes, sizes), axis=-1) if sizes is not None else None
       x_flat, unflatten = utils.flatten_batch_to_2d(data, sizes)
       adjacency = utils.convert_to_block_diag_2d(neighbors, sizes_square)
     else:
@@ -267,16 +261,16 @@ def edge_convolution_template(
     edge_features = edge_function(vertex_features, neighbor_features,
                                   **edge_function_kwargs)
 
-    if reduction == "weighted":
+    if reduction == "max":
+      features = tf.math.segment_max(
+          data=edge_features, segment_ids=adjacency_ind_0)
+    elif reduction == "weighted":
       edge_features_weighted = edge_features * tf.expand_dims(
           adjacency.values, -1)
       features = tf.math.unsorted_segment_sum(
           data=edge_features_weighted,
           segment_ids=adjacency_ind_0,
           num_segments=tf.shape(input=x_flat)[0])
-    elif reduction == "max":
-      features = tf.math.segment_max(
-          data=edge_features, segment_ids=adjacency_ind_0)
     else:
       raise ValueError("The reduction method must be 'weighted' or 'max'")
 

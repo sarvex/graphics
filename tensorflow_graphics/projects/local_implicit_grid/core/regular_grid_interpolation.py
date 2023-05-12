@@ -49,7 +49,7 @@ def get_interp_coefficients(grid,
   dim = len(grid.get_shape().as_list()) - 2
 
   # normalize coords for interpolation
-  if isinstance(min_grid_value, list) or isinstance(min_grid_value, tuple):
+  if isinstance(min_grid_value, (list, tuple)):
     min_grid_value = tf.constant(min_grid_value, dtype=tf.float32)
   if isinstance(max_grid_value, list) or isinstance(min_grid_value, tuple):
     max_grid_value = tf.constant(max_grid_value, dtype=tf.float32)
@@ -121,5 +121,4 @@ def regular_grid_interpolation(grid,
   """
   lats, weights, _ = get_interp_coefficients(grid, pts, min_grid_value,
                                              max_grid_value)
-  vals = tf.reduce_sum(lats * weights[..., tf.newaxis], axis=-2)
-  return vals
+  return tf.reduce_sum(lats * weights[..., tf.newaxis], axis=-2)

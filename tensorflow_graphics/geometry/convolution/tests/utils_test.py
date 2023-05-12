@@ -573,8 +573,7 @@ class UtilsConvertToBlockDiag2dTests(test_case.TestCase):
   def test_convert_to_block_diag_2d_no_padding(self):
     """Test block diagonalization without any padding."""
     batch_data = np.random.uniform(size=(3, 4, 5, 4))
-    block_diag_data = linalg.block_diag(
-        *[x for x in np.reshape(batch_data, (-1, 5, 4))])
+    block_diag_data = linalg.block_diag(*list(np.reshape(batch_data, (-1, 5, 4))))
 
     batch_data_sparse = _dense_to_sparse(batch_data)
     block_diag_sparse = utils.convert_to_block_diag_2d(batch_data_sparse)

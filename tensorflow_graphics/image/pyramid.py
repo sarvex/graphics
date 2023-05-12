@@ -200,8 +200,7 @@ def merge(levels: List[type_alias.TensorLike],
     levels = [tf.convert_to_tensor(value=level) for level in levels]
 
     for index, level in enumerate(levels):
-      shape.check_static(
-          tensor=level, tensor_name="level {}".format(index), has_rank=4)
+      shape.check_static(tensor=level, tensor_name=f"level {index}", has_rank=4)
 
     image = levels[-1]
     kernel = _binomial_kernel(tf.shape(input=image)[3], dtype=image.dtype)

@@ -40,9 +40,7 @@ class RasterizationBackendTestBase(test_case.TestCase):
       shapes = self._remove_dynamic_shapes(shapes)
       if shapes is None:
         return
-    placeholders = self._create_placeholders_from_shapes(
-        shapes=shapes, dtypes=dtypes)
-    return placeholders
+    return self._create_placeholders_from_shapes(shapes=shapes, dtypes=dtypes)
 
   @parameterized.parameters((
       ((2, 7, 3), (5, 3), (2, 4, 4)),
@@ -62,8 +60,8 @@ class RasterizationBackendTestBase(test_case.TestCase):
                                       placeholders[2], (600, 800),
                                       enable_cull_face, self._num_layers,
                                       self._backend)
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail('Exception raised: %s' % str(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f'Exception raised: {str(e)}')
 
   @parameterized.parameters((
       ((1, 7, 3), (5, 3), (1, 4, 4)),

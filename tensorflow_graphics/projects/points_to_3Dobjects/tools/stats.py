@@ -37,13 +37,14 @@ def count_objects():
   dataset = io.get_dataset(tfrecord_path, mapping_function,
                            buffer_size, shuffle, cycle_length)
   i = 0
-  my_dict = {}
-  my_dict[3001627] = set()
-  my_dict[4256520] = set()
-  my_dict[4379243] = set()
-  my_dict[2876657] = set()
-  my_dict[2880940] = set()
-  my_dict[3797390] = set()
+  my_dict = {
+      3001627: set(),
+      4256520: set(),
+      4379243: set(),
+      2876657: set(),
+      2880940: set(),
+      3797390: set(),
+  }
   for d in dataset:
     classes = d['classes']
     mesh_names = d['mesh_names']

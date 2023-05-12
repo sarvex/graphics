@@ -161,12 +161,10 @@ def knot_weights(
     basis_functions = all_basis_functions[degree]
 
     if not cyclical and num_knots - degree == 1:
-      # In this case all weights are non-zero and we can just return them.
       if not sparse_mode:
         return basis_functions(positions)
-      else:
-        shift = tf.zeros_like(positions, dtype=tf.int32)
-        return basis_functions(positions), shift
+      shift = tf.zeros_like(positions, dtype=tf.int32)
+      return basis_functions(positions), shift
 
     # shape_batch = positions.shape.as_list()
     shape_batch = tf.shape(input=positions)

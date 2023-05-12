@@ -63,8 +63,7 @@ def euler_from_rotation_matrix(matrix: tf.Tensor, axis: int) -> tf.float32:
   mask[:, axis] = False
   matrix2d = tf.reshape(tf.boolean_mask(matrix, mask), [2, 2])
   a = matrix2d[0, 1] if axis == 1 else matrix2d[1, 0]
-  euler_angle = tf.math.atan2(a, matrix2d[0, 0])
-  return euler_angle
+  return tf.math.atan2(a, matrix2d[0, 0])
 
 
 def compute_dot(image_size: tf.Tensor,
@@ -107,9 +106,7 @@ def compute_dot(image_size: tf.Tensor,
   l = t_inv[axis] * -1 / ray[axis]  # determine lambda
   l = tf.expand_dims(l, -1)
 
-  # this is the same
-  dot = ray * l + t_inv
-  return dot
+  return ray * l + t_inv
 
 
 def get_next_sample_dataset(dataset_iter):
@@ -117,9 +114,7 @@ def get_next_sample_dataset(dataset_iter):
   try:
     sample = next(dataset_iter)
   except (StopIteration, RuntimeError) as e:
-    if "Can't copy Tensor with type" in str(e):
-      sample = None
-    elif isinstance(e, StopIteration):
+    if "Can't copy Tensor with type" in str(e) or isinstance(e, StopIteration):
       sample = None
     else:
       raise e
@@ -128,16 +123,14 @@ def get_next_sample_dataset(dataset_iter):
 
 def get_devices(gpu_ids):
   """Get device."""
-  if gpu_ids is not None:
-    gpu_ids = [f'/gpu:{gpu}' for gpu in gpu_ids.split(',')]
-    cpu_ids = [
-        f'/cpu:{x.name.split(":")[-1]}'
-        for x in tf.config.list_physical_devices('CPU')
-    ]
-    device_ids = [*cpu_ids, *gpu_ids]
-  else:
-    device_ids = None
-  return device_ids
+  if gpu_ids is None:
+    return None
+  gpu_ids = [f'/gpu:{gpu}' for gpu in gpu_ids.split(',')]
+  cpu_ids = [
+      f'/cpu:{x.name.split(":")[-1]}'
+      for x in tf.config.list_physical_devices('CPU')
+  ]
+  return [*cpu_ids, *gpu_ids]
 
 
 def using_multigpu():
@@ -153,11 +146,7 @@ def compute_batch_size(tensor_dict):
   """Compute batch size."""
   if using_multigpu():
     dummy_tensor = next(iter(tensor_dict.values())).values
-    batch_size = 0
-    for ii in range(len(dummy_tensor)):
-      batch_size += tf.shape(dummy_tensor[ii])[0]
+    return sum(tf.shape(dummy_tensor[ii])[0] for ii in range(len(dummy_tensor)))
   else:
     dummy_tensor = next(iter(tensor_dict.values()))
-    batch_size = tf.shape(dummy_tensor)[0]
-
-  return batch_size
+    return tf.shape(dummy_tensor)[0]

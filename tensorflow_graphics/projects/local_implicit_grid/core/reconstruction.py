@@ -62,8 +62,7 @@ class LIGOptimizer(object):
 
   def _load_params(self, ckpt_dir):
     param_file = os.path.join(ckpt_dir, 'params.txt')
-    params = evaluator.parse_param_file(param_file)
-    return params
+    return evaluator.parse_param_file(param_file)
 
   def _init_graph(self):
     """Initialize computation graph for tensorflow.
@@ -170,17 +169,15 @@ class LIGOptimizer(object):
     vars_ = model.trainable_variables
     varnames = [v.name for v in vars_]  # .split(':')[0]
     varnames = [scope+v.replace('lig/', '').strip(':0') for v in varnames]
-    map_dict = dict(zip(varnames, vars_))
-    return map_dict
+    return dict(zip(varnames, vars_))
 
   def _initialize_uninitialized(self, sess):
     global_vars = tf.global_variables()
     is_not_initialized = sess.run(
         [tf.is_variable_initialized(var) for var in global_vars])
-    not_initialized_vars = [v for (v, f) in zip(global_vars,
-                                                is_not_initialized) if not f]
-
-    if not_initialized_vars:
+    if not_initialized_vars := [
+        v for (v, f) in zip(global_vars, is_not_initialized) if not f
+    ]:
       sess.run(tf.variables_initializer(not_initialized_vars))
 
   def optimize_feat_grid(self, point_coords, point_vals, steps=10000,
@@ -346,7 +343,8 @@ def encode_decoder_one_scene(near_surface_samples, ckpt_dir, part_size,
       xmin=xmin-0.5*part_size, xmax=xmax+0.5*part_size, crop_size=part_size,
       ntarget=1, overlap=overlap, normalize_crops=False, return_shape=True)
   npts = min(npts, near_surface_samples.shape[0])
-  if verbose: print('LIG shape: {}'.format(grid_shape))
+  if verbose:
+    print(f'LIG shape: {grid_shape}')
   if verbose: print('Optimizing latent codes in LIG...')
   goptim = LIGOptimizer(
       ckpt, origin=xmin, grid_shape=grid_shape, part_size=part_size,

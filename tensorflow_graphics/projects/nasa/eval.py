@@ -117,7 +117,7 @@ def evaluate(hook_dict, ckpt, saver, best_iou, hparams):
               batch_val,
               hparams,
           )
-          logging.info("Generated mesh No.{}".format(example_cnt))
+          logging.info(f"Generated mesh No.{example_cnt}")
 
       except tf.errors.OutOfRangeError:
         accum_iou /= example_cnt

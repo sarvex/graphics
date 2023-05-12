@@ -167,12 +167,12 @@ def map_texture(uv_map: tfg_type.TensorLike,
     mipmap_indices = tf.clip_by_value(mipmap_indices, 0, num_mipmap_levels - 1)
     mipmap_indices = tf.cast(mipmap_indices, dtype=tf.int32)
 
-    # Map texture for each level and stack the results
-    mapped_texture_stack = []
-    for mipmap_image in mipmap_images:
-      mapped_texture_stack.append(
-          texture_map.map_texture(
-              uv_map=uv_map, texture_image=mipmap_image, tiling=tiling))
+    mapped_texture_stack = [
+        texture_map.map_texture(uv_map=uv_map,
+                                texture_image=mipmap_image,
+                                tiling=tiling)
+        for mipmap_image in mipmap_images
+    ]
     mapped_texture_stack = tf.stack(mapped_texture_stack, axis=-2)
 
     # Gather the lower and higher mipmapped textures

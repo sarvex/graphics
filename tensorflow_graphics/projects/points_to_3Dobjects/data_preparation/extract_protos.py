@@ -128,7 +128,7 @@ def decode_bytes(serialized):
 def fix_rotation(rotation_y, object_class):
   if object_class == 2:  # table
     rotation_y = tf.math.floormod(rotation_y, math.pi)
-  elif object_class == 3 or object_class == 4:  # bottle, bowl
+  elif object_class in [3, 4]:  # bottle, bowl
     rotation_y = tf.constant(0.0)
   return rotation_y
 
@@ -137,7 +137,7 @@ def fix_rotation_matrix(rotation_matrix, object_class):
   fix_angle = tf_utils.euler_from_rotation_matrix(rotation_matrix, 1)
   if object_class == 2:  # table
     fix_angle = tf.math.floormod(fix_angle, math.pi)
-  elif object_class == 3 or object_class == 4:  # bottle, bowl
+  elif object_class in [3, 4]:  # bottle, bowl
     fix_angle = tf.constant(0.0)
   euler_angles_fixed = tf.stack([0.0, fix_angle, 0.0])
   rotation_matrix = rotation_matrix_3d.from_euler(euler_angles_fixed)
@@ -166,8 +166,8 @@ def decode_bytes_multiple(serialized):
         'shapes': [tf.int32, []]
     }
 
-    field_names = [n for n in name_type_shape.keys()]
-    output_types = [name_type_shape[k][0] for k in name_type_shape.keys()]
+    field_names = list(name_type_shape.keys())
+    output_types = [name_type_shape[k][0] for k in name_type_shape]
     _, tensors = tf.io.decode_proto(serialized, message_type,
                                     field_names, output_types)
 
@@ -256,26 +256,26 @@ def decode_bytes_multiple(serialized):
 
   status = True
   if status:
-    output_dict = {}
-    output_dict['name'] = tensor_dict['name']  # e.g. 'train-0000'
-    output_dict['scene_filename'] = tensor_dict['scene_filename']
-    output_dict['mesh_names'] = tensor_dict['mesh_names']
-    output_dict['classes'] = tensor_dict['classes']
-    output_dict['image'] = image
-    output_dict['image_data'] = tensor_dict['image_data']
-    output_dict['original_image_spatial_shape'] = original_image_spatial_shape
-    output_dict['num_boxes'] = num_boxes
-    output_dict['center2d'] = tensor_dict['center2d']
-    output_dict['groundtruth_boxes'] = groundtruth_boxes
-    output_dict['dot'] = dot - dot
-    output_dict['sizes_3d'] = sizes_3d
-    output_dict['translations_3d'] = translations_3d
-    output_dict['rotations_3d'] = rotations_3d
-    output_dict['rt'] = rt
-    output_dict['k'] = tensor_dict['k']
-    output_dict['groundtruth_valid_classes'] = classes
-    output_dict['shapes'] = tensor_dict['shapes']
-
+    output_dict = {
+        'name': tensor_dict['name'],
+        'scene_filename': tensor_dict['scene_filename'],
+        'mesh_names': tensor_dict['mesh_names'],
+        'classes': tensor_dict['classes'],
+        'image': image,
+        'image_data': tensor_dict['image_data'],
+        'original_image_spatial_shape': original_image_spatial_shape,
+        'num_boxes': num_boxes,
+        'center2d': tensor_dict['center2d'],
+        'groundtruth_boxes': groundtruth_boxes,
+        'dot': dot - dot,
+        'sizes_3d': sizes_3d,
+        'translations_3d': translations_3d,
+        'rotations_3d': rotations_3d,
+        'rt': rt,
+        'k': tensor_dict['k'],
+        'groundtruth_valid_classes': classes,
+        'shapes': tensor_dict['shapes'],
+    }
   return output_dict
 
 
@@ -301,8 +301,8 @@ def decode_bytes_multiple_scannet(serialized):
         'shapes': [tf.int32, []]
     }
 
-    field_names = [n for n in name_type_shape.keys()]
-    output_types = [name_type_shape[k][0] for k in name_type_shape.keys()]
+    field_names = list(name_type_shape.keys())
+    output_types = [name_type_shape[k][0] for k in name_type_shape]
     _, tensors = tf.io.decode_proto(serialized, message_type,
                                     field_names, output_types)
 
@@ -397,10 +397,11 @@ def decode_bytes_multiple_scannet(serialized):
 
   status = True
   if status:
-    output_dict = {}
-    output_dict['name'] = tensor_dict['name']  # e.g. 'train-0000'
-    output_dict['scene_filename'] = tensor_dict['scene_filename']
-    output_dict['mesh_names'] = tf.reshape(tensor_dict['mesh_names'], [-1])
+    output_dict = {
+        'name': tensor_dict['name'],
+        'scene_filename': tensor_dict['scene_filename'],
+        'mesh_names': tf.reshape(tensor_dict['mesh_names'], [-1]),
+    }
     output_dict['classes'] = tf.reshape(tensor_dict['classes'], [-1])
     output_dict['image'] = image
     output_dict['image_data'] = tensor_dict['image_data']

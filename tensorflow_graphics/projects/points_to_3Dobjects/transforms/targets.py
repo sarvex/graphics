@@ -85,8 +85,7 @@ def valid_bounding_boxes_mask(boxes, height, width, tolerance_pixels=1.0):
   invalid_boxes = tf.math.logical_or(
       tf.math.less_equal(boxes_height, tolerance_pixels),
       tf.math.less_equal(boxes_width, tolerance_pixels))
-  valid_boxes_mask = tf.cast(tf.math.logical_not(invalid_boxes), tf.float32)
-  return valid_boxes_mask
+  return tf.cast(tf.math.logical_not(invalid_boxes), tf.float32)
 
 
 def assign_center_targets(gt_box_batch,

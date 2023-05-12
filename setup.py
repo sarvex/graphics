@@ -20,6 +20,7 @@ Note:
   assumes setup.py file lives at the root of the project.
 """
 
+
 import datetime
 import os
 import sys
@@ -34,14 +35,13 @@ else:
 
 # --- compute the version (for both nightly and normal)
 now = datetime.datetime.now()
-VERSION = "{}.{}.{}".format(now.year, now.month, now.day)
+VERSION = f"{now.year}.{now.month}.{now.day}"
 curr_path = os.path.dirname(__file__)
 ini_file_path = os.path.join(curr_path, "tensorflow_graphics/__init__.py")
 ini_file_lines = list(open(ini_file_path))
 with open(ini_file_path, "w") as f:
   for line in ini_file_lines:
-    f.write(line.replace("__version__ = \"HEAD\"",
-                         "__version__ = \"{}\"".format(VERSION)))
+    f.write(line.replace("__version__ = \"HEAD\"", f'__version__ = \"{VERSION}\"'))
 
 # --- Extract the dependencies
 REQS = [line.strip() for line in open("requirements.txt")]

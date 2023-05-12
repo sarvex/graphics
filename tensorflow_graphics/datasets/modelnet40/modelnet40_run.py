@@ -34,10 +34,12 @@ def main(_):
   print("label.shape", label.shape)
 
   # --- example accessing info
-  print("Example of string='{}' to ID#={}".format(
-      "airplane", info.features["label"].str2int("airplane")))
-  print("Example of ID#={} to string='{}'".format(
-      12, info.features["label"].int2str(12)))
+  print(
+      f"""Example of string='airplane' to ID#={info.features["label"].str2int("airplane")}"""
+  )
+  print(
+      f"""Example of ID#=12 to string='{info.features["label"].int2str(12)}'"""
+  )
 
 
 if __name__ == "__main__":

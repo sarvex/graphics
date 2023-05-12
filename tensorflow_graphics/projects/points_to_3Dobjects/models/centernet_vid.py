@@ -80,10 +80,7 @@ class CenterNetVID:
       layers_to_train = [layers_to_train] if isinstance(
           layers_to_train, str) else layers_to_train
       for m in self.network.layers:
-        if m.name in layers_to_train:
-          m.trainable = True
-        else:
-          m.trainable = False
+        m.trainable = m.name in layers_to_train
       self.network.summary()
 
     self.clip_norm = clip_norm
@@ -97,10 +94,7 @@ class CenterNetVID:
   @staticmethod
   def _get_ckpt_dir(path):
     if gfile.IsDirectory(path):
-      if path[-1] == '/':
-        return path[:-1]
-      else:
-        return path
+      return path[:-1] if path[-1] == '/' else path
     else:
       return os.path.dirname(path)
 
@@ -166,10 +160,7 @@ class CenterNetVID:
       for head_name in losses:
         head_output = output[head_name]
         head_loss = losses[head_name]['loss']
-        if head_name in sample:
-          head_gt = sample[head_name]
-        else:
-          head_gt = None
+        head_gt = sample[head_name] if head_name in sample else None
         head_weight = losses[head_name]['weight']
         current_loss = head_loss(head_output, head_gt, sample)
         info = f'Loss {head_name}:{current_loss}'
@@ -420,7 +411,7 @@ class CenterNetVID:
                                            self.network.trainable_variables)
     for i, grad in enumerate(network_gradients):
       if grad is not None:
-        tf.debugging.check_numerics(grad, 'Invalid gradients: '+str(i))
+        tf.debugging.check_numerics(grad, f'Invalid gradients: {str(i)}')
 
     gradients_norm = tf.constant(0)
     if self.clip_norm:
@@ -439,8 +430,7 @@ class CenterNetVID:
   def nms(centers):
     centers_max = tf.nn.max_pool2d(centers, 3, 1, 'SAME')
     centers_keep = tf.cast(tf.abs(centers_max - centers) < 1e-6, tf.float32)
-    centers_nms = tf.multiply(centers_keep, centers)
-    return centers_nms
+    return tf.multiply(centers_keep, centers)
 
   @staticmethod
   def _top_scores_heatmaps(centers, k):
@@ -485,8 +475,7 @@ class CenterNetVID:
         xs + width_height[..., 0:1] / 2, ys + width_height[..., 1:2] / 2
     ],
                        axis=-1)
-    detections = tf.concat([bboxes, scores, classes], axis=-1)
-    return detections
+    return tf.concat([bboxes, scores, classes], axis=-1)
 
   @staticmethod
   def transform_and_group_detections_per_class(detections, metadata,
@@ -537,12 +526,11 @@ class CenterNetVID:
       print(apply_sigmoid)
 
     batch_id = 0
-    detections_dict = {}
-    detections_dict['centers'] = output['centers'][batch_id, ...]
-    detections_dict['centers_sigmoid'] = \
-        output['centers_sigmoid'][batch_id, ...]
-    detections_dict['centers_nms'] = output['centers_nms'][batch_id, ...]
-
+    detections_dict = {
+        'centers': output['centers'][batch_id, ...],
+        'centers_sigmoid': output['centers_sigmoid'][batch_id, ...],
+        'centers_nms': output['centers_nms'][batch_id, ...],
+    }
     # self.K = sample['num_boxes'][0].numpy()
 
     xs, ys, topk_classes, topk_inds, scores = self._top_scores_heatmaps(
@@ -564,12 +552,12 @@ class CenterNetVID:
                                        width_height)
     original_image_size = sample[self.sample_image_size][batch_id, :2]
     center, side_size, input_size = transforms. \
-      compute_image_size_affine_transform(original_image_size, input_image_size)
+        compute_image_size_affine_transform(original_image_size, input_image_size)
     metadata = tf.stack([center, side_size, input_size], axis=0)[None, ...]
     detections = self.transform_detections(detections, metadata)
 
     sizes_3d, translations_3d, rotations_3d = \
-        centernet_utils.decode_box_3d(output, topk_inds, self.rotation_svd)
+          centernet_utils.decode_box_3d(output, topk_inds, self.rotation_svd)
     rotations_3d = tf.reshape(rotations_3d, [-1, k, 3, 3])
 
     # Shape post-processing
@@ -588,7 +576,7 @@ class CenterNetVID:
       num_classes = 6
       cluster_size = 50
       detection_classes_reorder = \
-          np.array([3, 4, 0, 5, 1, 2])[detection_classes.numpy()]
+            np.array([3, 4, 0, 5, 1, 2])[detection_classes.numpy()]
       mask = tf.repeat(tf.one_hot(detection_classes_reorder, num_classes,
                                   axis=-1),
                        repeats=[cluster_size], axis=-1)
@@ -607,7 +595,7 @@ class CenterNetVID:
 
     # Transform predicted point cloud
     transformed_pointclouds = \
-        centernet_utils.transform_pointcloud(predicted_pointclouds / 2.0,
+          centernet_utils.transform_pointcloud(predicted_pointclouds / 2.0,
                                              sizes_3d,
                                              rotations_3d,
                                              translations_3d)
@@ -624,7 +612,7 @@ class CenterNetVID:
     projected_pointclouds = intrinsics @ extrinsics @ transformed_pointclouds
     projected_pointclouds = tf.transpose(projected_pointclouds, [0, 1, 3, 2])
     projected_pointclouds = \
-        projected_pointclouds / projected_pointclouds[:, :, :, -1:]
+          projected_pointclouds / projected_pointclouds[:, :, :, -1:]
 
     # detections_dict['centers'] = detections_dict['centers']
     # detections_dict['centers_sigmoid'] = detections_dict['centers_sigmoid']
@@ -636,14 +624,14 @@ class CenterNetVID:
     detections_dict['translations_3d'] = translations_3d[batch_id, ...]
     detections_dict['sizes_3d'] = sizes_3d[batch_id, ...]
     detections_dict['groundtruth_sdfs'] = \
-        output['groundtruth_sdfs'][batch_id, ...]
+          output['groundtruth_sdfs'][batch_id, ...]
     detections_dict['groundtruth_pointclouds'] = \
-        output['groundtruth_pointclouds'][batch_id, ...]
+          output['groundtruth_pointclouds'][batch_id, ...]
     detections_dict['predicted_sdfs'] = predicted_sdfs[batch_id, ...]
     detections_dict['predicted_pointclouds'] = \
-        predicted_pointclouds[batch_id, ...]
+          predicted_pointclouds[batch_id, ...]
     detections_dict['shapes'] = shape_classes[batch_id, ...]
     detections_dict['shapes_logits'] = shape_logits[batch_id, ...]
     detections_dict['projected_pointclouds'] = \
-        projected_pointclouds[batch_id, ...]
+          projected_pointclouds[batch_id, ...]
     return detections_dict

@@ -35,9 +35,12 @@ def define_flags():
   flags = tf.app.flags
 
   # Dataset Parameters
-  flags.DEFINE_enum("dataset", "amass",
-                    list(k for k in datasets.dataset_dict.keys()),
-                    "Name of the dataset.")
+  flags.DEFINE_enum(
+      "dataset",
+      "amass",
+      list(datasets.dataset_dict.keys()),
+      "Name of the dataset.",
+  )
   flags.DEFINE_string("data_dir", None, "Directory to load data from.")
   flags.mark_flag_as_required("data_dir")
   flags.DEFINE_integer("sample_bbox", 1024, "Number of bbox samples.")
@@ -47,7 +50,7 @@ def define_flags():
   flags.DEFINE_integer("subject", 0, "Index of the subject for training.")
 
   # Model Parameters
-  flags.DEFINE_enum("model", "nasa", list(k for k in models.model_dict.keys()),
+  flags.DEFINE_enum("model", "nasa", list(models.model_dict.keys()),
                     "Name of the model.")
   flags.DEFINE_integer("n_parts", 24, "Number of parts.")
   flags.DEFINE_integer("total_dim", 960,
@@ -152,8 +155,7 @@ def gen_mesh(sess,
     verts = scale * (verts - 0.5)
     verts = verts * gt_scale + gt_center
     faces = np.stack([faces[..., 1], faces[..., 0], faces[..., 2]], axis=-1)
-    mesh = trimesh.Trimesh(vertices=verts, faces=faces)
-    return mesh
+    return trimesh.Trimesh(vertices=verts, faces=faces)
   except:  # pylint: disable=bare-except
     return None
 
@@ -186,8 +188,8 @@ def save_mesh(sess,
         batch_val,
         hparams,
         idx=i)
-    mesh_name = "full_pred.obj"
     if mesh_model is not None:
+      mesh_name = "full_pred.obj"
       with tf.io.gfile.GFile(path.join(pth, mesh_name), "w") as fout:
         mesh_model.export(fout, file_type="obj")
 
@@ -222,10 +224,7 @@ def make_summary_feed_dict(
     best_hook,
     best_iou,
 ):
-  feed_dict = {}
-  feed_dict[iou_hook] = iou
-  feed_dict[best_hook] = best_iou
-  return feed_dict
+  return {iou_hook: iou, best_hook: best_iou}
 
 
 def parse_global_step(ckpt):

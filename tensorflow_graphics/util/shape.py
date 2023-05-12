@@ -113,9 +113,9 @@ def _check_type(variable, variable_name, expected_type):
   else:
     expected_type_name = expected_type.__name__
   if not isinstance(variable, expected_type):
-    raise ValueError('{} must be of type {}, but it is {}'.format(
-        variable_name, expected_type_name,
-        type(variable).__name__))
+    raise ValueError(
+        f'{variable_name} must be of type {expected_type_name}, but it is {type(variable).__name__}'
+    )
 
 
 def _fix_axis_dim_pairs(pairs, name):
@@ -124,9 +124,7 @@ def _fix_axis_dim_pairs(pairs, name):
     pairs = [pairs]
   for pair in pairs:
     if len(pair) != 2:
-      raise ValueError(
-          '{} must consist of axis-value pairs, but found {}'.format(
-              name, pair))
+      raise ValueError(f'{name} must consist of axis-value pairs, but found {pair}')
   return pairs
 
 
@@ -233,8 +231,8 @@ def _check_tensor_axis_lists(tensors, tensors_name, axes, axes_name):
   _check_type(axes, axes_name, (list, tuple))
   if len(tensors) != len(axes):
     raise ValueError(
-        '{} and {} must have the same length, but are {} and {}.'.format(
-            tensors_name, axes_name, len(tensors), len(axes)))
+        f'{tensors_name} and {axes_name} must have the same length, but are {len(tensors)} and {len(axes)}.'
+    )
 
 
 def _fix_axes(tensors, axes, allow_negative):
@@ -250,14 +248,14 @@ def _fix_axes(tensors, axes, allow_negative):
     rank_axis_pairs = list(
         zip([tensor.shape.ndims for tensor in tensors], axes))
     raise ValueError(
-        'Some axes are out of bounds. Given rank-axes pairs: {}'.format(
-            [pair for pair in rank_axis_pairs]))
+        f'Some axes are out of bounds. Given rank-axes pairs: {list(rank_axis_pairs)}'
+    )
   return axes
 
 
 def _give_default_names(list_of_objects, name):
   """Helper function to give default names to objects for error messages."""
-  return [name + '_' + str(index) for index in range(len(list_of_objects))]
+  return [f'{name}_{str(index)}' for index in range(len(list_of_objects))]
 
 
 def _all_are_equal(list_of_objects):
@@ -270,10 +268,8 @@ def _all_are_equal(list_of_objects):
 
 
 def _raise_error(tensor_names, batch_shapes):
-  formatted_list = [(name, batch_shape)
-                    for name, batch_shape in zip(tensor_names, batch_shapes)]
-  raise ValueError(
-      'Not all batch dimensions are identical: {}'.format(formatted_list))
+  formatted_list = list(zip(tensor_names, batch_shapes))
+  raise ValueError(f'Not all batch dimensions are identical: {formatted_list}')
 
 
 def compare_batch_dimensions(tensors,
@@ -336,15 +332,14 @@ def compare_batch_dimensions(tensors,
         # set(dims) should return (None, some_int).
         # Otherwise shapes are not identical.
         _raise_error(tensor_names, batch_shapes)
-  else:
-    if not all(
+  elif not all(
         is_broadcast_compatible(shape1, shape2)
         for shape1, shape2 in itertools.combinations(batch_shapes, 2)):
-      raise ValueError(
-          'Not all batch dimensions are broadcast-compatible: {}'.format([
-              (name, batch_shape.as_list())
-              for name, batch_shape in zip(tensor_names, batch_shapes)
-          ]))
+    raise ValueError(
+        'Not all batch dimensions are broadcast-compatible: {}'.format([
+            (name, batch_shape.as_list())
+            for name, batch_shape in zip(tensor_names, batch_shapes)
+        ]))
 
 
 def compare_dimensions(tensors, axes, tensor_names=None):
@@ -371,9 +366,9 @@ def compare_dimensions(tensors, axes, tensor_names=None):
     tensor_names = _give_default_names(tensors, 'tensor')
   dimensions = [_get_dim(tensor, axis) for tensor, axis in zip(tensors, axes)]
   if not _all_are_equal(dimensions):
-    raise ValueError('Tensors {} must have the same number of dimensions in '
-                     'axes {}, but they are {}.'.format(
-                         list(tensor_names), list(axes), list(dimensions)))
+    raise ValueError(
+        f'Tensors {list(tensor_names)} must have the same number of dimensions in axes {list(axes)}, but they are {list(dimensions)}.'
+    )
 
 
 def is_static(tensor_shape):
@@ -418,9 +413,8 @@ def add_batch_dimensions(tensor, tensor_name, batch_shape, last_axis=None):
       return tensor
     elif tensor_batch_shape:
       raise ValueError(
-          'Tensor {} has batch dimensions different from target '
-          'one. Found {}, but expected no batch dimensions or {}'.format(
-              tensor_name, tensor.shape[:last_axis + 1], batch_shape))
+          f'Tensor {tensor_name} has batch dimensions different from target one. Found {tensor.shape[:last_axis + 1]}, but expected no batch dimensions or {batch_shape}'
+      )
 
   return tf.broadcast_to(tensor, batch_shape + list(tensor.shape))
 

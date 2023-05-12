@@ -332,7 +332,10 @@ def transform_predictions(points, center, scale, output_size):
 
 
 def transform_points_np(points, center, scale, output_size, inverse):
-  new_points = image_utils.transform_points(points.numpy(), center.numpy(),
-                                            scale.numpy(), output_size.numpy(),
-                                            inverse)
-  return new_points
+  return image_utils.transform_points(
+      points.numpy(),
+      center.numpy(),
+      scale.numpy(),
+      output_size.numpy(),
+      inverse,
+  )

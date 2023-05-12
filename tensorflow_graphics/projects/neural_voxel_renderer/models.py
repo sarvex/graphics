@@ -73,13 +73,13 @@ def unet_3x_with_res_in_mid(feat_in, out_filters, norm2d):
                           size=4,
                           strides=1)  # 32x64
   d7 = layers.concatenate([d6, feat_in])  # 32xN
-  d8 = layers.Conv2D(out_filters,
-                     kernel_size=4,
-                     strides=(1, 1),
-                     padding='same',
-                     kernel_initializer=initializer)(d7)  # 32xout
-
-  return d8
+  return layers.Conv2D(
+      out_filters,
+      kernel_size=4,
+      strides=(1, 1),
+      padding='same',
+      kernel_initializer=initializer,
+  )(d7)
 
 
 def neural_voxel_renderer_plus(voxels,

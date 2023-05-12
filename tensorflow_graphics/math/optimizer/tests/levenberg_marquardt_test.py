@@ -130,8 +130,8 @@ class OptimizerTest(test_case.TestCase):
               variables=(x, y),
               max_iterations=1,
               regularizer=1e-20))
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {str(e)}")
 
   def test_minimize_linear_residuals_random(self):
     """Optimizing linear residuals should give the minimum in 1 step."""

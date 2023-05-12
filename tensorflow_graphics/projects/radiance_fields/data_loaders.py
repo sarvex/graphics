@@ -41,9 +41,7 @@ def load_synthetic_nerf_dataset(dataset_dir: str = DATASETDIR,
   Returns:
       A tf.data.Dataset containing the images and camera parameters.
   """
-  anno_file = os.path.join(dataset_dir,
-                           dataset_name,
-                           'transforms_{}.json'.format(split))
+  anno_file = os.path.join(dataset_dir, dataset_name, f'transforms_{split}.json')
   with tf.io.gfile.GFile(anno_file, 'r') as fp:
     anno = json.load(fp)
 
@@ -211,8 +209,7 @@ def set_srn_sample_proto(shape_name: str,
       'w2v_alpha': _float_feature(list(w2v_alpha.flatten())),
       'w2v_beta': _float_feature(list(w2v_beta.flatten()))
       }
-  proto_sample = tf.train.Example(features=tf.train.Features(feature=feature))
-  return proto_sample
+  return tf.train.Example(features=tf.train.Features(feature=feature))
 
 
 def get_srn_sample_proto(element):
@@ -268,7 +265,7 @@ def load_srn_dataset(tfrecords_dir: str,
   Returns:
       A tf.data.Dataset containing the images and camera parameters.
   """
-  tfrecords_pattern = tfrecords_dir + '/*.tfrecord'
+  tfrecords_pattern = f'{tfrecords_dir}/*.tfrecord'
   dataset = tf.data.Dataset.list_files(tfrecords_pattern,
                                        shuffle=True,
                                        seed=seed)

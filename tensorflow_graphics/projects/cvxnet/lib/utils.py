@@ -53,9 +53,12 @@ def define_flags():
   """Define command line flags."""
   flags = tf.app.flags
   # Model flags
-  flags.DEFINE_enum("model", "multiconvex",
-                    list(k for k in models.model_dict.keys()),
-                    "Name of the model.")
+  flags.DEFINE_enum(
+      "model",
+      "multiconvex",
+      list(models.model_dict.keys()),
+      "Name of the model.",
+  )
   flags.DEFINE_float("sharpness", 75., "Sharpness term.")
   flags.DEFINE_integer("n_parts", 50, "Number of convexes uesd.")
   flags.DEFINE_integer("n_half_planes", 25, "Number of half spaces used.")
@@ -68,9 +71,12 @@ def define_flags():
                      "Level set used for extracting surfaces.")
 
   # Dataset flags
-  flags.DEFINE_enum("dataset", "shapenet",
-                    list(k for k in datasets.dataset_dict.keys()),
-                    "Name of the dataset.")
+  flags.DEFINE_enum(
+      "dataset",
+      "shapenet",
+      list(datasets.dataset_dict.keys()),
+      "Name of the dataset.",
+  )
   flags.DEFINE_integer("image_h", 137, "The height of the color images.")
   flags.DEFINE_integer("image_w", 137, "The width of the color images.")
   flags.DEFINE_integer("image_d", 3, "The channels of color images.")
@@ -210,7 +216,7 @@ def save_mesh(mesh, name, eval_dir):
   cls_dir = path.join(eval_dir, "meshes", cls_name)
   if not tf.io.gfile.isdir(cls_dir):
     tf.io.gfile.makedirs(cls_dir)
-  with tf.io.gfile.GFile(path.join(cls_dir, obj_name + ".obj"), "w") as fout:
+  with tf.io.gfile.GFile(path.join(cls_dir, f"{obj_name}.obj"), "w") as fout:
     mesh.export(fout, file_type="obj")
 
 
@@ -271,15 +277,15 @@ def compute_surface_metrics(mesh, name, mesh_dir):
 
 def init_stats():
   """Initialize evaluation stats."""
-  stats = {}
-  for k in SYSNET_CLASSES:
-    stats[k] = {
-        "cnt": 0,
-        "iou": 0.,
-        "chamfer": 0.,
-        "fscore": 0.,
-    }
-  return stats
+  return {
+      k: {
+          "cnt": 0,
+          "iou": 0.0,
+          "chamfer": 0.0,
+          "fscore": 0.0,
+      }
+      for k in SYSNET_CLASSES
+  }
 
 
 def update_stats(example_stats, name, shapenet_stats):
@@ -322,8 +328,7 @@ def write_stats(stats, eval_dir, step):
   """
   if not tf.io.gfile.isdir(eval_dir):
     tf.io.gfile.makedirs(eval_dir)
-  with tf.io.gfile.GFile(path.join(eval_dir, "stats_{}.csv".format(step)),
-                         "w") as fout:
+  with tf.io.gfile.GFile(path.join(eval_dir, f"stats_{step}.csv"), "w") as fout:
     fout.write("class,iou,chamfer,fscore\n")
     for k in sorted(stats.keys()):
       if k == "all":

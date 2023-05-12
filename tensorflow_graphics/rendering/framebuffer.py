@@ -40,7 +40,7 @@ class RasterizedAttribute(object):
         tensor.shape.as_list() for tensor in tensors if tensor is not None
     ]
     ranks = [len(shape) for shape in shapes]
-    if not all(rank == ranks[0] for rank in ranks):
+    if any(rank != ranks[0] for rank in ranks):
       raise ValueError(
           "Expected value and derivatives to be of the same rank, but found"
           f" ranks {shapes}")
@@ -122,7 +122,7 @@ class Framebuffer(object):
 
     ranks = [len(v.shape) for v in values]
     shapes = [tf.shape(v) for v in values]
-    if not all(rank == ranks[0] for rank in ranks):
+    if any(rank != ranks[0] for rank in ranks):
       raise ValueError(
           f"Expected all inputs to have the same rank, but found {shapes}")
 
@@ -146,10 +146,7 @@ class Framebuffer(object):
 
   @property
   def num_layers(self):
-    if self.is_multi_layer:  # pylint: disable=using-constant-test
-      return tf.shape(self.triangle_id)[1]
-    else:
-      return 1
+    return tf.shape(self.triangle_id)[1] if self.is_multi_layer else 1
 
   @property
   def height(self):

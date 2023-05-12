@@ -38,12 +38,8 @@ def normalize_mesh(mesh, in_place=True):
   scale = 1.0 / np.max(mesh.bounds[1, :] - mesh.bounds[0, :])
   centroid = mesh.centroid
   scaled_vertices = (mesh.vertices - centroid) * scale
-  if in_place:
-    scaled_mesh = mesh
-    scaled_mesh.vertices = scaled_vertices
-  else:
-    scaled_mesh = mesh.copy()
-    scaled_mesh.vertices = scaled_vertices
+  scaled_mesh = mesh if in_place else mesh.copy()
+  scaled_mesh.vertices = scaled_vertices
   scaled_mesh.fix_normals()
   return scaled_mesh
 
@@ -67,8 +63,8 @@ def main(argv):
   mesh = trimesh.load(FLAGS.input_mesh)
   mesh = normalize_mesh(mesh)
   sample_pts, sample_normals = sample_mesh(mesh)
-  print('Computed {} samples from mesh.'.format(sample_pts.shape[0]))
-  print('Writing sampled points to {}'.format(FLAGS.output_ply))
+  print(f'Computed {sample_pts.shape[0]} samples from mesh.')
+  print(f'Writing sampled points to {FLAGS.output_ply}')
   pu.write_point_ply(FLAGS.output_ply, sample_pts, sample_normals)
 
 

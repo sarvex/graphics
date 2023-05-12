@@ -100,11 +100,11 @@ def summary_command(parser, flags, log_to_file=True, log_to_summary=True):
   """Cache the command used to reproduce experiment in summary folder."""
   if not flags.tensorboard:
     return
-  exec_string = "python " + parser.prog + " \\\n"
+  exec_string = f"python {parser.prog}" + " \\\n"
   nflags = len(vars(flags))
   for i, arg in enumerate(vars(flags)):
-    exec_string += "  --{} ".format(arg)
-    exec_string += "{}".format(getattr(flags, arg))
+    exec_string += f"  --{arg} "
+    exec_string += f"{getattr(flags, arg)}"
     if i + 1 < nflags:
       exec_string += " \\\n"
   exec_string += "\n"
@@ -122,13 +122,12 @@ def setup_tensorboard(flags):
     return
 
   # --- Do not allow experiment with same name
-  assert (not tf.io.gfile.exists(flags.logdir) or
-          not tf.io.gfile.listdir(flags.logdir)), \
-    "CRITICAL: folder {} already exists".format(flags.logdir)
+  assert not tf.io.gfile.exists(flags.logdir) or not tf.io.gfile.listdir(
+      flags.logdir), f"CRITICAL: folder {flags.logdir} already exists"
 
   # --- Log where summary can be found
   print("View results with: ")
-  termcolor.cprint("  tensorboard --logdir {}".format(flags.logdir), "red")
+  termcolor.cprint(f"  tensorboard --logdir {flags.logdir}", "red")
   writer = tf.summary.create_file_writer(flags.logdir, flush_millis=10000)
   writer.set_as_default()
 
@@ -147,10 +146,10 @@ def handle_keyboard_interrupt(flags):
   if flags.logdir.startswith("gs://"):
     bucketpath = flags.logdir[5:]
     print("Delete these summaries with: ")
-    termcolor.cprint("  gsutil rm -rf {}".format(flags.logdir), "red")
+    termcolor.cprint(f"  gsutil rm -rf {flags.logdir}", "red")
     baseurl = "  https://pantheon.google.com/storage/browser/{}"
     print("Or by visiting: ")
     termcolor.cprint(baseurl.format(bucketpath), "red")
   else:
     print("Delete these summaries with: ")
-    termcolor.cprint("  rm -rf {}".format(flags.logdir), "red")
+    termcolor.cprint(f"  rm -rf {flags.logdir}", "red")

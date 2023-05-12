@@ -48,24 +48,14 @@ class TestCaseTest(test_case.TestCase):
     except unittest.SkipTest as e:
       # Forwarding SkipTest exception in order to skip the test.
       raise e
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % type(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {type(e)}")
 
   @parameterized.parameters(None, (((1.0,),),))
   def test_assert_tf_lite_convertible_exception_raised(self, test_inputs):
     """Tests that assert_tf_lite_convertible succeeds with a simple function."""
     # TODO(b/131912561): TFLite conversion throws SIGABRT instead of Exception.
     return
-    # pylint: disable=unreachable
-    # This code should be able to catch exceptions correctly once TFLite bug
-    # is fixed.
-    tc = test_case.TestCase(methodName="assert_tf_lite_convertible")
-
-    with self.assertRaises(Exception):
-      tc.assert_tf_lite_convertible(
-          func=self._dummy_tf_lite_incompatible_function,
-          shapes=((1,),),
-          test_inputs=test_inputs)
     # pylint: enable=unreachable
 
   def _dummy_failing_function(self, data):

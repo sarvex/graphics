@@ -30,12 +30,23 @@ def images_to_video(input_dir, output_path, sequences, input_pattern,
     start = str(sequences[sequence_id][0])
     end = str(sequences[sequence_id][1] - sequences[sequence_id][0])
     try:
-      path = os.path.join(output_path, 'video_' + str(sequence_id) + '.gif')
-      subprocess.run([
-          'ffmpeg', '-y', '-framerate', str(framerate),
-          '-start_number', start,
-          '-i', '"' + input_dir + '/' + input_pattern + '"',
-          '-frames:v', end, path], check=True)
+      path = os.path.join(output_path, f'video_{str(sequence_id)}.gif')
+      subprocess.run(
+          [
+              'ffmpeg',
+              '-y',
+              '-framerate',
+              str(framerate),
+              '-start_number',
+              start,
+              '-i',
+              f'"{input_dir}/{input_pattern}"',
+              '-frames:v',
+              end,
+              path,
+          ],
+          check=True,
+      )
     except ValueError:
       logging.info('Could not process video.')
 

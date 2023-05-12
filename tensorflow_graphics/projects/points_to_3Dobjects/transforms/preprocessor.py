@@ -67,8 +67,8 @@ def preprocess(tensor_dict,
   for option in preprocess_options:
     func, params = option
     if func not in func_arg_map:
-      raise ValueError('The function %s does not exist in func_arg_map' %
-                       (func.__name__))
+      raise ValueError(
+          f'The function {func.__name__} does not exist in func_arg_map')
     arg_names = func_arg_map[func]
     if isinstance(arg_names[0], (list, tuple)):
       arg_names_input, arg_names_output = arg_names

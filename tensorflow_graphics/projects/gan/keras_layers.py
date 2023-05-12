@@ -267,14 +267,14 @@ class Noise(tf.keras.layers.Layer):
   def build(
       self, input_shape: Union[tf.TensorShape,
                                Sequence[tf.TensorShape]]) -> None:
-    if not isinstance(input_shape, tf.TensorShape):
-      if len(input_shape) != 2:
-        raise ValueError('Either a single input feature map or 2 inputs '
-                         '(feature map and noise) are expected.')
-      feature_map_shape, _ = input_shape
-    else:
+    if isinstance(input_shape, tf.TensorShape):
       feature_map_shape = input_shape
 
+    elif len(input_shape) != 2:
+      raise ValueError('Either a single input feature map or 2 inputs '
+                       '(feature map and noise) are expected.')
+    else:
+      feature_map_shape, _ = input_shape
     self._per_channel_scales = self.add_weight(
         name='per_channel_scales',
         shape=(feature_map_shape[-1],),

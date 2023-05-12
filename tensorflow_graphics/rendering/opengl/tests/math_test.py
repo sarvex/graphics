@@ -494,7 +494,7 @@ class MathTest(test_case.TestCase):
     model_to_eye_matrix = look_at.right_handed(camera_origin, look_at_point,
                                                camera_up)
     perspective_matrix = perspective.right_handed(
-        fov, (image_size[0:1] / image_size[1:2]), near_plane, far_plane)
+        fov, image_size[:1] / image_size[1:2], near_plane, far_plane)
 
     # Computes where those points project in screen coordinates.
     pixel_position, _ = glm.model_to_screen(convex_combination,
@@ -636,7 +636,7 @@ class MathTest(test_case.TestCase):
     model_to_eye_matrix = look_at.right_handed(camera_origin, look_at_point,
                                                camera_up)
     perspective_matrix = perspective.right_handed(
-        fov, (image_size[0:1] / image_size[1:2]), near_plane, far_plane)
+        fov, image_size[:1] / image_size[1:2], near_plane, far_plane)
 
     # Computes where those points project in screen coordinates.
     pixel_position, _ = glm.model_to_screen(convex_combination,

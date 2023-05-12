@@ -53,12 +53,11 @@ def _maybe_upsample_and_add_outputs(
   """
   if previous_level_output is None:
     return current_level_output
-  else:
-    upsampled_output = keras_layers.TwoByTwoNearestNeighborUpSampling()(
-        previous_level_output)
-    if use_bilinear_upsampling:
-      upsampled_output = keras_layers.Blur2D()(upsampled_output)
-    return current_level_output + upsampled_output
+  upsampled_output = keras_layers.TwoByTwoNearestNeighborUpSampling()(
+      previous_level_output)
+  if use_bilinear_upsampling:
+    upsampled_output = keras_layers.Blur2D()(upsampled_output)
+  return current_level_output + upsampled_output
 
 
 def get_noise_dimensions(
@@ -79,8 +78,7 @@ def get_noise_dimensions(
   noise_dimensions = [(4, 4, 1)]
   size = 8
   for _ in range(num_upsampling_blocks):
-    for _ in range(2):
-      noise_dimensions.append((size, size, 1))
+    noise_dimensions.extend((size, size, 1) for _ in range(2))
     size *= 2
   return noise_dimensions
 
@@ -88,10 +86,9 @@ def get_noise_dimensions(
 def _create_noise_inputs(num_upsampling_blocks: int) -> List[tf.Tensor]:
   """Creates the noise input layers."""
   noise_dimensions = get_noise_dimensions(num_upsampling_blocks)
-  noise_inputs = [
+  return [
       tf.keras.Input(noise_dimension) for noise_dimension in noise_dimensions
   ]
-  return noise_inputs
 
 
 def create_synthesis_network(

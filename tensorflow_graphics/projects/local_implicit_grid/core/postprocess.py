@@ -31,8 +31,7 @@ def merge_meshes(mesh_list):
     nv += m.vertices.shape[0]
   v = np.concatenate(verts, axis=0)
   f = np.concatenate(faces, axis=0)
-  merged_mesh = trimesh.Trimesh(v, f)
-  return merged_mesh
+  return trimesh.Trimesh(v, f)
 
 
 def average_onto_vertex(mesh, per_face_attrib):
@@ -45,8 +44,7 @@ def average_onto_vertex(mesh, per_face_attrib):
   v2f += 1
   per_vert_sum = np.sum(c[v2f], axis=1)
   per_vert_count = np.sum(np.logical_not(v2f == 0), axis=1)
-  per_vert_attrib = per_vert_sum / per_vert_count
-  return per_vert_attrib
+  return per_vert_sum / per_vert_count
 
 
 def average_onto_face(mesh, per_vert_attrib):
@@ -54,8 +52,7 @@ def average_onto_face(mesh, per_vert_attrib):
   assert per_vert_attrib.shape[0] == mesh.vertices.shape[0]
   assert len(per_vert_attrib.shape) == 1
   per_face_attrib = per_vert_attrib[mesh.faces]
-  per_face_attrib = np.mean(per_face_attrib, axis=1)
-  return per_face_attrib
+  return np.mean(per_face_attrib, axis=1)
 
 
 def remove_backface(mesh, pc, k=3, lap_iter=50, lap_val=0.50,
@@ -82,7 +79,8 @@ def remove_backface(mesh, pc, k=3, lap_iter=50, lap_val=0.50,
   tree_pc = spatial.cKDTree(data=v)
 
   # for each vertex, find nearest point in input point cloud
-  if verbose: print("{}-nearest neighbor search...".format(k))
+  if verbose:
+    print(f"{k}-nearest neighbor search...")
   _, idx = tree_pc.query(mesh.vertices, k=k, n_jobs=-1)
 
   # slice out the nn points

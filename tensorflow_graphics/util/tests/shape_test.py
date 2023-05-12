@@ -201,17 +201,15 @@ class ShapeTest(test_case.TestCase):
     """Tests that compare_batch_dimensions raises expected exceptions."""
     if not tensor_shapes:
       tensors = 0
+    elif all(shape.is_static(tensor_shape) for tensor_shape in tensor_shapes):
+      tensors = [tf.ones(tensor_shape) for tensor_shape in tensor_shapes]
+    elif tf.executing_eagerly():
+      return
     else:
-      if all(shape.is_static(tensor_shape) for tensor_shape in tensor_shapes):
-        tensors = [tf.ones(tensor_shape) for tensor_shape in tensor_shapes]
-      else:
-        # Dynamic shapes are not supported in eager mode.
-        if tf.executing_eagerly():
-          return
-        tensors = [
-            tf.compat.v1.placeholder(shape=tensor_shape, dtype=tf.float32)
-            for tensor_shape in tensor_shapes
-        ]
+      tensors = [
+          tf.compat.v1.placeholder(shape=tensor_shape, dtype=tf.float32)
+          for tensor_shape in tensor_shapes
+      ]
     self.assert_exception_is_raised(
         shape.compare_batch_dimensions,
         error_msg,
@@ -241,10 +239,9 @@ class ShapeTest(test_case.TestCase):
     """Tests that compare_batch_dimensions works for various inputs."""
     if all(shape.is_static(tensor_shape) for tensor_shape in tensor_shapes):
       tensors = [tf.ones(tensor_shape) for tensor_shape in tensor_shapes]
+    elif tf.executing_eagerly():
+      return
     else:
-      # Dynamic shapes are not supported in eager mode.
-      if tf.executing_eagerly():
-        return
       tensors = [
           tf.compat.v1.placeholder(shape=tensor_shape, dtype=tf.float32)
           for tensor_shape in tensor_shapes

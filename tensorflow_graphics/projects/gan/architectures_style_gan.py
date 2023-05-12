@@ -205,14 +205,13 @@ def create_synthesis_network(latent_code_dimension: int = 128,
       input_tensor=tensor,
       kernel_initializer=kernel_initializer,
       name='final_output')
-  if generate_intermediate_outputs:
-    outputs.append(tensor)
-
-    return tf.keras.Model(
-        inputs=mapped_latent_code_input, outputs=outputs, name=name)
-  else:
+  if not generate_intermediate_outputs:
     return tf.keras.Model(
         inputs=mapped_latent_code_input, outputs=tensor, name=name)
+  outputs.append(tensor)
+
+  return tf.keras.Model(
+      inputs=mapped_latent_code_input, outputs=outputs, name=name)
 
 
 def create_style_based_generator(

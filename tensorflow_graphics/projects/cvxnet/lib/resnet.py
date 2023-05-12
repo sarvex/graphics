@@ -62,15 +62,9 @@ class ResLayer(keras.Model):
 
   def __init__(self, block, inplanes, planes, blocks, stride=1):
     super(ResLayer, self).__init__()
-    if stride != 1 or inplanes != planes:
-      downsample = True
-    else:
-      downsample = False
-
-    self.conv_layers = []
-    self.conv_layers.append(block(planes, stride, downsample=downsample))
-    for unused_i in range(1, blocks):
-      self.conv_layers.append(block(planes))
+    downsample = stride != 1 or inplanes != planes
+    self.conv_layers = [block(planes, stride, downsample=downsample)]
+    self.conv_layers.extend(block(planes) for _ in range(1, blocks))
 
   def call(self, x, training=True):
     for layer in self.conv_layers:
@@ -89,13 +83,11 @@ class BasicBlock(keras.Model):
     self.bn1 = keras.layers.BatchNormalization()
     self.conv2 = keras.layers.Conv2D(planes, 3, padding='same', use_bias=False)
     self.bn2 = keras.layers.BatchNormalization()
+    self.downsample = downsample
     if downsample:
-      self.downsample = downsample
       self.dconv1 = keras.layers.Conv2D(
           planes, 1, strides=stride, padding='same', use_bias=False)
       self.dbn1 = keras.layers.BatchNormalization()
-    else:
-      self.downsample = downsample
 
   def call(self, x, training=True):
     residual = x

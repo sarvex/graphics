@@ -67,18 +67,17 @@ def gather_faces(vertices: type_alias.TensorLike,
         last_axes=(-3, -3),
         broadcast_compatible=False)
 
-    if hasattr(tf, "batch_gather"):
-      expanded_vertices = tf.expand_dims(vertices, axis=-3)
-      broadcasted_shape = tf.concat(
-          [tf.shape(input=indices)[:-1],
-           tf.shape(input=vertices)[-2:]],
-          axis=-1)
-      broadcasted_vertices = tf.broadcast_to(expanded_vertices,
-                                             broadcasted_shape)
-      return tf.gather(broadcasted_vertices, indices, batch_dims=-1)
-    else:
+    if not hasattr(tf, "batch_gather"):
       return tf.gather(
           vertices, indices, axis=-2, batch_dims=indices.shape.ndims - 2)
+    expanded_vertices = tf.expand_dims(vertices, axis=-3)
+    broadcasted_shape = tf.concat(
+        [tf.shape(input=indices)[:-1],
+         tf.shape(input=vertices)[-2:]],
+        axis=-1)
+    broadcasted_vertices = tf.broadcast_to(expanded_vertices,
+                                           broadcasted_shape)
+    return tf.gather(broadcasted_vertices, indices, batch_dims=-1)
 
 
 def face_normals(faces: type_alias.TensorLike,
@@ -197,10 +196,10 @@ def vertex_normals(
 
     # Triangulate non-triangular faces.
     if shape_indices[-1] > 3:
-      triangle_indices = []
-      for i in range(1, shape_indices[-1] - 1):
-        triangle_indices.append(
-            tf.concat((indices[..., 0:1], indices[..., i:i + 2]), axis=-1))
+      triangle_indices = [
+          tf.concat((indices[..., 0:1], indices[..., i:i + 2]), axis=-1)
+          for i in range(1, shape_indices[-1] - 1)
+      ]
       indices = tf.concat(triangle_indices, axis=-2)
       shape_indices = indices.shape.as_list()
 

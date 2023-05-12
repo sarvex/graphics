@@ -49,15 +49,13 @@ def generate_preset_test_translations(dimensions=3):
 def generate_preset_test_rotation_matrices_3d():
   """Generates pre-set test 3d rotation matrices."""
   angles = generate_preset_test_euler_angles()
-  preset_rotation_matrix = rotation_matrix_3d.from_euler(angles)
-  return preset_rotation_matrix
+  return rotation_matrix_3d.from_euler(angles)
 
 
 def generate_preset_test_rotation_matrices_2d():
   """Generates pre-set test 2d rotation matrices."""
   angles = generate_preset_test_euler_angles(dimensions=1)
-  preset_rotation_matrix = rotation_matrix_2d.from_euler(angles)
-  return preset_rotation_matrix
+  return rotation_matrix_2d.from_euler(angles)
 
 
 def generate_preset_test_axis_angle():
@@ -70,8 +68,7 @@ def generate_preset_test_axis_angle():
 def generate_preset_test_quaternions():
   """Generates pre-set test quaternions."""
   angles = generate_preset_test_euler_angles()
-  preset_quaternion = quaternion.from_euler(angles)
-  return preset_quaternion
+  return quaternion.from_euler(angles)
 
 
 def generate_preset_test_dual_quaternions():
@@ -87,10 +84,7 @@ def generate_preset_test_dual_quaternions():
   preset_quaternion_dual = quaternion.multiply(preset_quaternion_translation,
                                                preset_quaternion_real)
 
-  preset_dual_quaternion = tf.concat(
-      (preset_quaternion_real, preset_quaternion_dual), axis=-1)
-
-  return preset_dual_quaternion
+  return tf.concat((preset_quaternion_real, preset_quaternion_dual), axis=-1)
 
 
 def generate_random_test_euler_angles_translations(
@@ -127,10 +121,7 @@ def generate_random_test_dual_quaternions():
   random_quaternion_dual = quaternion.multiply(random_quaternion_translation,
                                                random_quaternion_real)
 
-  random_dual_quaternion = tf.concat(
-      (random_quaternion_real, random_quaternion_dual), axis=-1)
-
-  return random_dual_quaternion
+  return tf.concat((random_quaternion_real, random_quaternion_dual), axis=-1)
 
 
 def generate_random_test_euler_angles(dimensions=3,

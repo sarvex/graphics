@@ -86,8 +86,8 @@ def get_3d_bounding_box_iou(box1, box2):
   box2 = box2.astype(np.float32)
 
   # rotates around z, while we rotate around y so need to swap
-  center_1 = tf.reshape(box1[0:3][[0, 2, 1]], [1, 3])
-  center_2 = tf.reshape(box2[0:3][[0, 2, 1]], [1, 3])
+  center_1 = tf.reshape(box1[:3][[0, 2, 1]], [1, 3])
+  center_2 = tf.reshape(box2[:3][[0, 2, 1]], [1, 3])
 
   rotation_z_1 = tf.reshape(box1[-1], [1])
   rotation_z_2 = tf.reshape(box2[-1], [1])
@@ -100,11 +100,19 @@ def get_3d_bounding_box_iou(box1, box2):
   height_2 = tf.reshape(box2[3 + 2], [1])
   width_2 = tf.reshape(box2[3 + 1], [1])
 
-  iou = np.squeeze(np_box_ops.iou3d_7dof_box(
-      length_1, height_1, width_1, center_1, rotation_z_1,
-      length_2, height_2, width_2, center_2, rotation_z_2))
-
-  return iou
+  return np.squeeze(
+      np_box_ops.iou3d_7dof_box(
+          length_1,
+          height_1,
+          width_1,
+          center_1,
+          rotation_z_1,
+          length_2,
+          height_2,
+          width_2,
+          center_2,
+          rotation_z_2,
+      ))
 
 
 class IoUMetric:
@@ -122,15 +130,15 @@ class IoUMetric:
   def update(self, labeled_sdfs, labeled_classes, labeled_poses,
              predicted_sdfs, predicted_classes, predicted_poses):
     """Update."""
-    labeled_rotations = labeled_poses[0]
     labeled_translations = labeled_poses[1]
-    labeled_sizes = labeled_poses[2]
-
     status = True
     if status:
       box_limits_x = [100, -100]
       # box_limits_y = [100, -100]
       box_limits_z = [100, -100]
+      labeled_rotations = labeled_poses[0]
+      labeled_sizes = labeled_poses[2]
+
       for i in range(labeled_translations.shape[0]):
         rot = tf.reshape(tf.gather(labeled_rotations[i], [0, 2, 6, 8]), [2, 2])
 
@@ -184,6 +192,7 @@ class IoUMetric:
     if status:
       _, axs = plt.subplots(labeled_translations.shape[0], 5)
       fig_obj_count = 0
+    status3 = False
     for class_id in range(self.max_num_classes):
       # Do the same for the ground truth and predictions
       sdf_values = tf.zeros_like(samples_world)[:, 0:1]
@@ -200,7 +209,7 @@ class IoUMetric:
                 tf.reshape(poses[0][i], [1, 1, 3, 3]),
                 tf.reshape(poses[1][i], [1, 1, 3]), inverse=True) * 2.0
             samples_object = \
-                (samples_object * (29.0/32.0) / 2.0 + 0.5) * 32.0 - 0.5
+                  (samples_object * (29.0/32.0) / 2.0 + 0.5) * 32.0 - 0.5
             samples = tf.squeeze(samples_object)
             interpolated = trilinear.interpolate(sdf, samples)
 
@@ -242,7 +251,6 @@ class IoUMetric:
       iou = intersection / union
       if not tf.math.is_nan(iou):
         ious.append(iou)
-      status3 = False
       if status3:
         _ = plt.figure(figsize=(5, 5))
         plt.clf()
@@ -270,10 +278,7 @@ class IoUMetric:
       logging.info(file)
       return
     else:
-      iou_per_class_means = []
-      for _, v in self.iou_per_class.items():
-        if v:
-          iou_per_class_means.append(np.mean(v))
+      iou_per_class_means = [np.mean(v) for _, v in self.iou_per_class.items() if v]
       return np.mean(iou_per_class_means)
 
   def reset(self):
@@ -315,6 +320,7 @@ class CollisionMetric:
     num_collisions = 0
     prev_intersection = 0
     sdf_values = tf.zeros_like(samples_world)[:, 0:1]
+    status2 = False
     for classes, sdfs, poses in [(predicted_classes,
                                   predicted_sdfs,
                                   predicted_poses)]:
@@ -335,7 +341,6 @@ class CollisionMetric:
         if intersection > prev_intersection:
           prev_intersection = intersection
           num_collisions += 1
-        status2 = False
         if status2:
           a = 1
           values = interpolated
@@ -374,20 +379,19 @@ class CollisionMetric:
 
   def evaluate(self):
     """Evaluate."""
-    if self.slave:
-      data = {'collisions': self.collisions,
-              'intersections': self.intersections,
-              'ious': self.ious}
-      with gfile.Open(self.path, 'wb') as file:
-        pickle.dump(data, file)
-      logging.info(file)
-      return
-    else:
+    if not self.slave:
       # self.collisions = []
       # for k, v in self.iou_per_class.items():
       #   if len(v) > 0:
       #     iou_per_class_means.append(np.mean(v))
       return np.sum(self.collisions)
+    data = {'collisions': self.collisions,
+            'intersections': self.intersections,
+            'ious': self.ious}
+    with gfile.Open(self.path, 'wb') as file:
+      pickle.dump(data, file)
+    logging.info(file)
+    return
 
   def reset(self):
     self.intersections = []
@@ -541,15 +545,11 @@ class BoxIoUMetric:
             ovmax = iou
             jmax = j
 
-      if ovmax > ovthresh:
-        if not r['det'][jmax]:
-          tp[d] = 1.
-          r['det'][jmax] = 1
-        else:
-          fp[d] = 1.
+      if ovmax > ovthresh and not r['det'][jmax]:
+        tp[d] = 1.
+        r['det'][jmax] = 1
       else:
         fp[d] = 1.
-
     # compute precision recall
     fp = np.cumsum(fp)
     tp = np.cumsum(tp)

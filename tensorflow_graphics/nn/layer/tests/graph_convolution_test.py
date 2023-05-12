@@ -74,7 +74,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
         try:
           output = layer(inputs=[data, neighbors], sizes=None)
         except Exception as e:  # pylint: disable=broad-except
-          self.fail("Exception raised: %s" % str(e))
+          self.fail(f"Exception raised: {str(e)}")
       else:
         try:
           output = gc_layer.feature_steered_convolution_layer(
@@ -86,7 +86,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
               num_output_channels=out_channels,
               var_name=name_scope)
         except Exception as e:  # pylint: disable=broad-except
-          self.fail("Exception raised: %s" % str(e))
+          self.fail(f"Exception raised: {str(e)}")
       return output
 
     output = _run_convolution()
@@ -101,7 +101,7 @@ class GraphConvolutionTestFeatureSteeredConvolutionLayerTests(
       if tf.executing_eagerly():
         trainable_variables = layer.trainable_variables
         for tv in trainable_variables:
-          if tv.name == name_scope + "/" + var_name + ":0":
+          if tv.name == f"{name_scope}/{var_name}:0":
             return tv.shape.as_list()
         raise ValueError("Variable not found.")
       else:
@@ -213,8 +213,8 @@ class GraphConvolutionTestDynamicGraphConvolutionKerasLayerTests(
 
     try:
       output = layer(inputs=[data, neighbors], sizes=None)
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {str(e)}")
 
     self.assertAllEqual((batch_size, num_vertices, out_channels), output.shape)
 

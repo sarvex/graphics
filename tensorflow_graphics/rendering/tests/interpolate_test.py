@@ -96,7 +96,7 @@ class RasterizeTest(test_case.TestCase):
     image_shape = [1] + rendered.shape[2:]
     for layer_index in range(num_layers):
       baseline_image = rasterization_test_utils.load_baseline_image(
-          'Unlit_Cube_{}_{}.png'.format(0, layer_index), image_shape)
+          f'Unlit_Cube_0_{layer_index}.png', image_shape)
       images_near, error_message = rasterization_test_utils.compare_images(
           self, baseline_image, rendered[:, layer_index, ...])
       self.assertTrue(images_near, msg=error_message)

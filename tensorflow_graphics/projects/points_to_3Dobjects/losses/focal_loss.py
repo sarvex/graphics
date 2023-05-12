@@ -37,10 +37,8 @@ class FocalLoss:
       positive_loss = tf.reduce_sum(positive_loss)
       negative_loss = tf.reduce_sum(negative_loss)
       number_positive = tf.reduce_sum(positive_mask)
-      if number_positive == 0:
-        loss = -positive_loss
-      else:
-        loss = -(positive_loss + negative_loss) / number_positive
+      return (-positive_loss if number_positive == 0 else
+              -(positive_loss + negative_loss) / number_positive)
     else:
       positive_loss = tf.reduce_sum(positive_loss, axis=[1, 2, 3])
       negative_loss = tf.reduce_sum(negative_loss, axis=[1, 2, 3])
@@ -51,6 +49,4 @@ class FocalLoss:
           number_positive)
       loss_1 = -positive_loss
       loss_2 = -(positive_loss + negative_loss) / number_positive
-      loss = loss_1 * number_positive_mask + loss_2 * (1 - number_positive_mask)
-
-    return loss
+      return loss_1 * number_positive_mask + loss_2 * (1 - number_positive_mask)

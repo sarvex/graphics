@@ -60,18 +60,17 @@ def extract_unique_edges_from_triangular_mesh(faces: type_alias.TensorLike,
   faces_rank = len(faces_shape)
   if faces_rank != 2:
     raise ValueError(
-        "'faces' must have a rank equal to 2, but it has rank {} and shape {}."
-        .format(faces_rank, faces_shape))
+        f"'faces' must have a rank equal to 2, but it has rank {faces_rank} and shape {faces_shape}."
+    )
   if faces_shape[1] != 3:
     raise ValueError(
-        "'faces' must have exactly 3 dimensions in the last axis, but it has {}"
-        " dimensions and is of shape {}.".format(faces_shape[1], faces_shape))
+        f"'faces' must have exactly 3 dimensions in the last axis, but it has {faces_shape[1]} dimensions and is of shape {faces_shape}."
+    )
   edges = np.concatenate([faces[:, 0:2], faces[:, 1:3], faces[:, [2, 0]]],
                          axis=0)
   if directed_edges:
     edges = np.concatenate([edges, np.flip(edges, axis=-1)])
-  unique_edges = np.unique(edges, axis=0)
-  return unique_edges
+  return np.unique(edges, axis=0)
 
 
 def get_degree_based_edge_weights(
@@ -108,16 +107,15 @@ def get_degree_based_edge_weights(
   edges_rank = len(edges_shape)
   if edges_rank != 2:
     raise ValueError(
-        "'edges' must have a rank equal to 2, but it has rank {} and shape {}."
-        .format(edges_rank, edges_shape))
+        f"'edges' must have a rank equal to 2, but it has rank {edges_rank} and shape {edges_shape}."
+    )
   if edges_shape[1] != 2:
     raise ValueError(
-        "'edges' must have exactly 2 dimensions in the last axis, but it has {}"
-        " dimensions and is of shape {}.".format(edges_shape[1], edges_shape))
+        f"'edges' must have exactly 2 dimensions in the last axis, but it has {edges_shape[1]} dimensions and is of shape {edges_shape}."
+    )
   degree = np.bincount(edges[:, 0])
   rep_degree = degree[edges[:, 0]]
-  weights = 1.0 / rep_degree.astype(dtype)
-  return weights
+  return 1.0 / rep_degree.astype(dtype)
 
 
 # API contains all public functions and classes.

@@ -100,7 +100,7 @@ def main(argv):
     print('Postprocessing generated mesh...')
     mesh = postprocess.remove_backface(mesh, surface_points)
 
-  print('Writing reconstructed mesh to {}'.format(FLAGS.output_ply))
+  print(f'Writing reconstructed mesh to {FLAGS.output_ply}')
   with gfile.GFile(FLAGS.output_ply, 'wb') as fh:
     mesh.export(fh, 'ply')
 

@@ -41,8 +41,7 @@ def positional_encoding(features: tf.Tensor,
 
     output = [features]
     for i in range(num_frequencies):
-      for fn in [tf.sin, tf.cos]:
-        output.append(fn(2. ** i * features))
+      output.extend(fn(2. ** i * features) for fn in [tf.sin, tf.cos])
     return tf.concat(output, -1)
 
 # API contains all public functions and classes.

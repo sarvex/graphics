@@ -53,7 +53,7 @@ class VoxelGrid(features.Tensor):
     # Path to .mat file
     if isinstance(example_data, dict):
 
-      if not all(key in example_data for key in ['path', 'key']):
+      if any(key not in example_data for key in ['path', 'key']):
         raise ValueError(
             f'Missing keys in provided dictionary! Expecting \'path\''
             f' and \'key\', but {example_data.keys()} were given.')
@@ -71,11 +71,11 @@ class VoxelGrid(features.Tensor):
 
       voxel_grid = voxel_mat[example_data['key']].astype(np.float32)
 
-    else:
-      if example_data.ndim != 3:
-        raise ValueError('Only 3D Voxel Grids are supported.')
-
+    elif example_data.ndim == 3:
       voxel_grid = example_data
+
+    else:
+      raise ValueError('Only 3D Voxel Grids are supported.')
 
     return super(VoxelGrid, self).encode_example(voxel_grid)
 

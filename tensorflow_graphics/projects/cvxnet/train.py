@@ -46,7 +46,7 @@ def main(unused_argv):
   batch = tf.data.make_one_shot_iterator(data).get_next()
 
   # Select model.
-  logging.info("=> Creating {} model".format(FLAGS.model))
+  logging.info(f"=> Creating {FLAGS.model} model")
   model = models.get_model(FLAGS.model, FLAGS)
   optimizer = tf.train.AdamOptimizer(FLAGS.lr)
 

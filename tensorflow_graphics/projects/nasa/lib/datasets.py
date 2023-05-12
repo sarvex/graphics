@@ -26,7 +26,7 @@ def get_dataset(split, hparams):
 def amass(split, hparams):
   """Construct an AMASS data loader."""
 
-  def _input_fn(params):  # pylint: disable=unused-argument
+  def _input_fn(params):# pylint: disable=unused-argument
     # Dataset constants.
     n_bbox = 100000
     n_surf = 100000
@@ -124,7 +124,7 @@ def amass(split, hparams):
       return feature
 
     data_split = 'train'
-    all_motions = list(x for x in range(10))
+    all_motions = list(range(10))
     if split == 'train':
       file_pattern = [
           path.join(data_dir,

@@ -31,8 +31,7 @@ def plot_to_image(figure):
   width, height = figure.canvas.get_width_height()
   data_np = np.frombuffer(figure.canvas.tostring_rgb(), dtype='uint8')
   data_np = data_np.reshape([width, height, 3])
-  image = tf.expand_dims(data_np, 0)
-  return image
+  return tf.expand_dims(data_np, 0)
 
 
 def resize_heatmap(centers, color=(1, 0, 0), stride=4):
@@ -201,8 +200,6 @@ def plot_boxes_2d(image, sample, predictions, projection=True, groundtruth=True,
                   figsize=5,
                   class_id_to_name=CLASSES):
   """Plot."""
-  batch_id = 0
-
   figure = plt.figure(figsize=(figsize, figsize))
   plt.clf()
   plt.imshow(image)
@@ -218,6 +215,8 @@ def plot_boxes_2d(image, sample, predictions, projection=True, groundtruth=True,
 
   # Plot ground truth boxes
   if groundtruth:
+    batch_id = 0
+
     sample['detection_boxes'] = sample['groundtruth_boxes'][batch_id].numpy()
     for i in range(sample['detection_boxes'].shape[0]):
       y_min, x_min, y_max, x_max = sample['detection_boxes'][i]
@@ -237,9 +236,13 @@ def plot_boxes_2d(image, sample, predictions, projection=True, groundtruth=True,
              [y_min, y_min, y_max, y_max, y_min],
              linestyle='solid',
              color=colors[int(predictions['detection_classes'][i])])
-    plt.text(x_min, y_min, str(i) + '_' +
-             class_id_to_name[int(predictions['detection_classes'][i])] +
-             str(int(predictions['detection_scores'][i]*1000) / 1000.0))
+    plt.text(
+        x_min,
+        y_min,
+        (f'{str(i)}_' +
+         class_id_to_name[int(predictions['detection_classes'][i])]) +
+        str(int(predictions['detection_scores'][i] * 1000) / 1000.0),
+    )
   plt.axis('off')
   plt.tight_layout()
   return figure
@@ -280,9 +283,12 @@ def plot_boxes_3d(image, sample, predictions, figsize=5, groundtruth=True,
       y_max *= sample['original_image_spatial_shape'][batch_id][1].numpy()
       x_min *= sample['original_image_spatial_shape'][batch_id][0].numpy()
       x_max *= sample['original_image_spatial_shape'][batch_id][0].numpy()
-      plt.text(x_max, y_min,
-               str(i) + '_gt_' + \
-               class_id_to_name[int(sample['groundtruth_valid_classes'][batch_id][i])])
+      plt.text(
+          x_max,
+          y_min,
+          (f'{str(i)}_gt_' + class_id_to_name[int(
+              sample['groundtruth_valid_classes'][batch_id][i])]),
+      )
 
   # Plot predicted boxes
   colors = ['r', 'g', 'b', 'c', 'm', 'y', 'c', 'm', 'y', 'c', 'm', 'y']
@@ -297,9 +303,13 @@ def plot_boxes_3d(image, sample, predictions, figsize=5, groundtruth=True,
                          linestyle='solid',
                          color=colors[int(predictions['detection_classes'][i])])
     x_min, y_min, x_max, y_max = predictions['detection_boxes'][i]
-    plt.text(x_min, y_min, str(i) + '_' +
-             class_id_to_name[int(predictions['detection_classes'][i])] +
-             str(int(predictions['detection_scores'][i] * 1000) / 1000.0))
+    plt.text(
+        x_min,
+        y_min,
+        (f'{str(i)}_' +
+         class_id_to_name[int(predictions['detection_classes'][i])]) +
+        str(int(predictions['detection_scores'][i] * 1000) / 1000.0),
+    )
   plt.axis('off')
   plt.tight_layout()
   return figure
@@ -453,7 +463,7 @@ def plot_prediction(inputs, outputs, figsize=0.1, batch_id=0, plot_2d=False):
   # dot = outputs['dot'][batch_id].numpy()
   intrinsics = inputs['k'][batch_id].numpy()
   pose_world2camera = inputs['rt'][batch_id].numpy()
-  object_translation = np.squeeze(center3d[0:3])
+  object_translation = np.squeeze(center3d[:3])
   object_rotation = inputs['rotation'][batch_id].numpy()
 
   pose_obj2world = np.eye(4)
@@ -532,9 +542,9 @@ def save_for_blender(detections,
   prefix = '/cns/lu-d/home/giotto3d/datasets/shapenet/raw/'
   sufix = 'models/model_normalized.obj'
 
-  blender_dict = {}
-  blender_dict['image'] = \
-      tf.io.decode_image(sample['image_data'][batch_id]).numpy()
+  blender_dict = {
+      'image': tf.io.decode_image(sample['image_data'][batch_id]).numpy()
+  }
   blender_dict['world_to_cam'] = sample['rt'].numpy()
   num_predicted_shapes = int(detections['sizes_3d'].shape[0])
   blender_dict['num_predicted_shapes'] = num_predicted_shapes
@@ -583,7 +593,7 @@ def save_for_blender(detections,
   blender_dict['groundtruth_classes'] = \
       sample['groundtruth_valid_classes'].numpy()
 
-  path = log_dir + '.pkl'
+  path = f'{log_dir}.pkl'
   with gfile.Open(path, 'wb') as file:
     pickle.dump(blender_dict, file)
 

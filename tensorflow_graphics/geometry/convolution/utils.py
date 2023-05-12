@@ -37,7 +37,7 @@ def _is_dynamic_shape(tensors: Union[List[type_alias.TensorLike],
   """
   if not isinstance(tensors, (list, tuple)):
     raise ValueError("'tensors' must be list of tuple.")
-  return not all([shape.is_static(tensor.shape) for tensor in tensors])
+  return not all(shape.is_static(tensor.shape) for tensor in tensors)
 
 
 def check_valid_graph_convolution_input(data: type_alias.TensorLike,
@@ -456,15 +456,14 @@ def convert_to_block_diag_2d(data: tf.sparse.SparseTensor,
       cumsum = tf.cumsum(sizes, axis=0, exclusive=True)
       index_shift = tf.gather(cumsum, indices[:, 0])
       indices = indices[:, 1:] + index_shift
-      block_diag = tf.SparseTensor(indices, values,
-                                   tf.reduce_sum(input_tensor=sizes, axis=0))
+      return tf.SparseTensor(indices, values,
+                             tf.reduce_sum(input_tensor=sizes, axis=0))
     else:
       data_shape = tf.shape(input=data, out_type=tf.int64)
       index_shift = tf.expand_dims(indices[:, 0], -1) * data_shape[1:]
       indices = indices[:, 1:] + index_shift
-      block_diag = tf.SparseTensor(indices, data.values,
-                                   data_shape[0] * data_shape[1:])
-    return block_diag
+      return tf.SparseTensor(indices, data.values,
+                             data_shape[0] * data_shape[1:])
 
 
 # API contains all public functions and classes.

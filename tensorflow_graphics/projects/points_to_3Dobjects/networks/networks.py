@@ -36,8 +36,7 @@ class NormType:
     }
 
   def __call__(self):
-    norm_layer = self.norm() if not self.params else self.norm(**self.params)
-    return norm_layer
+    return self.norm() if not self.params else self.norm(**self.params)
 
 
 class Regularization:

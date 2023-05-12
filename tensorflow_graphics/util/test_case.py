@@ -126,19 +126,15 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
       dtypes = [tf.float32] * len(shapes)
     if sparse_tensors is None:
       sparse_tensors = [False] * len(shapes)
-    if tf.executing_eagerly():
-      placeholders = [
-          tf.compat.v1.placeholder_with_default(
-              tf.zeros(shape=shape, dtype=dtype), shape=shape)
-          for shape, dtype in zip(shapes, dtypes)
-      ]
-    else:
-      placeholders = [
-          tf.compat.v1.sparse.placeholder(dtype, shape=shape)
-          if is_sparse else tf.compat.v1.placeholder(shape=shape, dtype=dtype)
-          for shape, dtype, is_sparse in zip(shapes, dtypes, sparse_tensors)
-      ]
-    return placeholders
+    return ([
+        tf.compat.v1.placeholder_with_default(tf.zeros(shape=shape, dtype=dtype),
+                                              shape=shape)
+        for shape, dtype in zip(shapes, dtypes)
+    ] if tf.executing_eagerly() else [
+        tf.compat.v1.sparse.placeholder(dtype, shape=shape)
+        if is_sparse else tf.compat.v1.placeholder(shape=shape, dtype=dtype)
+        for shape, dtype, is_sparse in zip(shapes, dtypes, sparse_tensors)
+    ])
 
   def _tile_tensors(self, tiling, tensors):
     """Tiles a set of tensors using the tiling information.
@@ -183,8 +179,8 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
         shapes=shapes, dtypes=dtypes, sparse_tensors=sparse_tensors)
     try:
       func(*placeholders, **kwargs)
-    except Exception as e:  # pylint: disable=broad-except
-      self.fail("Exception raised: %s" % str(e))
+    except Exception as e:# pylint: disable=broad-except
+      self.fail(f"Exception raised: {str(e)}")
 
   def assert_exception_is_raised(self,
                                  func,
@@ -392,7 +388,7 @@ class TestCase(parameterized.TestCase, tf.test.TestCase):
           index = output_details[o]["index"]
           self.assertAllClose(test_output, interpreter.get_tensor(index))
       except Exception as e:  # pylint: disable=broad-except
-        self.fail("Exception raised: %s" % str(e))
+        self.fail(f"Exception raised: {str(e)}")
 
 
 def main(argv=None):

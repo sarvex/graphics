@@ -92,8 +92,10 @@ def compare_images(test_case,
   """
   tf.assert_equal(baseline_image.shape, image.shape)
   if baseline_image.dtype != image.dtype:
-    return False, ("Image types %s and %s do not match" %
-                   (baseline_image.dtype, image.dtype))
+    return (
+        False,
+        f"Image types {baseline_image.dtype} and {image.dtype} do not match",
+    )
   shape.check_static(
       tensor=baseline_image, tensor_name="baseline_image", has_rank=4)
   shape.check_static(tensor=image, tensor_name="image", has_rank=4)
@@ -156,9 +158,7 @@ def create_rasterizer_inputs(batch_shape):
                                   (3, num_attributes2)).astype(np.float32)
   attributes2 = set_batch_shape(attributes2, batch_shape)
 
-  attributes_dictionary = {}
-  attributes_dictionary["attribute1"] = attributes1
-  attributes_dictionary["attribute2"] = attributes2
+  attributes_dictionary = {"attribute1": attributes1, "attribute2": attributes2}
   triangles = np.array(((0, 1, 2),), np.int32)
 
   # Construct the view projection matrix.

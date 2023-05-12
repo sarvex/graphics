@@ -216,10 +216,9 @@ def render_voxels_from_blender_camera(voxels,
   camera_voxels = trilinear.interpolate(interpolated_voxels, sampling_volume)
   camera_voxels = tf.reshape(camera_voxels,
                              [batch_size] + list(frustum_size) + [4])
-  voxel_image = emission_absorption.render(camera_voxels,
-                                           absorption_factor=absorption_factor,
-                                           cell_size=cell_size)
-  return voxel_image
+  return emission_absorption.render(camera_voxels,
+                                    absorption_factor=absorption_factor,
+                                    cell_size=cell_size)
 
 
 def object_to_world(voxels,
@@ -247,7 +246,4 @@ def object_to_world(voxels,
                                                    target_volume_size)
   sampling_points = tf.cast(sampling_points, tf.float32)
   interpolated_points = trilinear.interpolate(voxels, sampling_points)
-  interpolated_voxels = tf.reshape(interpolated_points,
-                                   [-1] + list(target_volume_size)+[4])
-
-  return interpolated_voxels
+  return tf.reshape(interpolated_points, [-1] + list(target_volume_size) + [4])
